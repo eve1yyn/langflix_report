@@ -1,0 +1,552 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>주간 리뷰 분석 리포트 — 랭플릭스</title>
+<style>
+  :root{
+    color-scheme: light;
+    --page:      #f9f9f7;
+    --surface:   #fcfcfb;
+    --ink:       #0b0b0b;
+    --ink-2:     #52514e;
+    --muted:     #898781;
+    --hairline:  #e1e0d9;
+    --border:    rgba(11,11,11,0.10);
+    --accent:    #1baf7a;
+    --accent-ink:#0a6b48;
+
+    --duo:       #2a78d6;
+    --speak:     #eb6834;
+    --lang:      #1baf7a;
+
+    --r1: #86b6ef; --r2: #5598e7; --r3: #2a78d6; --r4: #1c5cab; --r5: #104281;
+
+    --good: #0ca30c; --warning:#fab219; --critical:#d03b3b;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:where(:not([data-theme="light"])){
+      color-scheme: dark;
+      --page:      #0d0d0d;
+      --surface:   #1a1a19;
+      --ink:       #ffffff;
+      --ink-2:     #c3c2b7;
+      --muted:     #898781;
+      --hairline:  #2c2c2a;
+      --border:    rgba(255,255,255,0.10);
+      --accent:    #199e70;
+      --accent-ink:#5cd9ab;
+
+      --duo:   #3987e5;
+      --speak: #d95926;
+      --lang:  #199e70;
+
+      --r1: #104281; --r2: #1c5cab; --r3: #2a78d6; --r4: #5598e7; --r5: #86b6ef;
+    }
+  }
+  :root[data-theme="dark"]{
+    color-scheme: dark;
+    --page:      #0d0d0d;
+    --surface:   #1a1a19;
+    --ink:       #ffffff;
+    --ink-2:     #c3c2b7;
+    --muted:     #898781;
+    --hairline:  #2c2c2a;
+    --border:    rgba(255,255,255,0.10);
+    --accent:    #199e70;
+    --accent-ink:#5cd9ab;
+    --duo:   #3987e5;
+    --speak: #d95926;
+    --lang:  #199e70;
+    --r1: #104281; --r2: #1c5cab; --r3: #2a78d6; --r4: #5598e7; --r5: #86b6ef;
+  }
+  :root[data-theme="light"]{
+    color-scheme: light;
+    --page:      #f9f9f7;
+    --surface:   #fcfcfb;
+    --ink:       #0b0b0b;
+    --ink-2:     #52514e;
+    --muted:     #898781;
+    --hairline:  #e1e0d9;
+    --border:    rgba(11,11,11,0.10);
+    --accent:    #1baf7a;
+    --accent-ink:#0a6b48;
+    --duo:   #2a78d6;
+    --speak: #eb6834;
+    --lang:  #1baf7a;
+    --r1: #86b6ef; --r2: #5598e7; --r3: #2a78d6; --r4: #1c5cab; --r5: #104281;
+  }
+
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    background:var(--page);
+    color:var(--ink);
+    font-family: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont,
+                 'Malgun Gothic', 'Apple SD Gothic Neo', system-ui, sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .page{ max-width: 980px; margin: 0 auto; padding: 48px 24px 80px; }
+
+  .eyebrow{
+    font-size:11px; font-weight:700; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--accent-ink); margin:0 0 10px;
+  }
+  .masthead h1{
+    font-size: 32px; font-weight:800; letter-spacing:-0.01em; margin:0 0 10px;
+    text-wrap:balance;
+  }
+  .masthead .meta{
+    display:flex; flex-wrap:wrap; gap:6px 18px; color:var(--ink-2); font-size:13.5px;
+    padding-bottom:22px; border-bottom:1px solid var(--hairline);
+  }
+  .masthead .meta b{ color:var(--ink); font-weight:600; }
+
+  .section-title{
+    font-size:19px; font-weight:700; margin: 0 0 4px; letter-spacing:-0.005em;
+  }
+  .section-sub{ font-size:13px; color:var(--muted); margin:0 0 18px; max-width:64ch; line-height:1.55; }
+  section{ margin-top:44px; }
+
+  .stat-grid{ display:grid; grid-template-columns: repeat(3,1fr); gap:14px; }
+  .stat-card{
+    background:var(--surface); border:1px solid var(--border); border-radius:10px;
+    padding:18px 18px 16px; border-top:3px solid var(--app-color);
+  }
+  .stat-card .app-name{ font-size:13.5px; font-weight:700; margin-bottom:10px; display:flex; align-items:center; gap:7px;}
+  .stat-card .app-name .dot{ width:9px;height:9px;border-radius:50%; background:var(--app-color); flex:none; }
+  .stat-card .hero{ font-size:34px; font-weight:800; line-height:1; }
+  .stat-card .hero small{ font-size:16px; font-weight:600; color:var(--muted); }
+  .stat-card .rows{ margin-top:12px; display:flex; flex-direction:column; gap:6px; font-size:12.5px; color:var(--ink-2); }
+  .stat-card .rows .row{ display:flex; justify-content:space-between; gap:10px; }
+  .pill{
+    display:inline-flex; align-items:center; gap:5px; padding:2px 8px; border-radius:99px;
+    font-size:11.5px; font-weight:700; font-variant-numeric:tabular-nums;
+  }
+  .pill.good{ background:color-mix(in srgb, var(--good) 16%, transparent); color:var(--good); }
+  .pill.warning{ background:color-mix(in srgb, var(--warning) 22%, transparent); color:#8a5a00; }
+  @media (prefers-color-scheme:dark){ .pill.warning{ color:#ffcf6b; } }
+  :root[data-theme="dark"] .pill.warning{ color:#ffcf6b; }
+  .pill.critical{ background:color-mix(in srgb, var(--critical) 16%, transparent); color:var(--critical); }
+
+  .legend{ display:flex; flex-wrap:wrap; gap:16px; margin-bottom:16px; }
+  .legend .item{ display:flex; align-items:center; gap:7px; font-size:12.5px; color:var(--ink-2); }
+  .legend .swatch{ width:10px; height:10px; border-radius:2px; }
+
+  .cat-chart{ display:flex; flex-direction:column; gap:14px; }
+  .cat-row .cat-label{ font-size:13px; font-weight:600; margin-bottom:6px; }
+  .cat-row .cat-bars{ display:flex; flex-direction:column; gap:4px; }
+  .cat-bar-track{ display:flex; align-items:center; gap:10px; height:14px; }
+  .cat-bar-track .scale{ position:relative; flex:1; height:10px; background:transparent; }
+  .bar{
+    position:absolute; left:0; top:0; height:10px; border-radius:0 4px 4px 0;
+    transition: filter .12s ease;
+  }
+  .bar:hover, .bar:focus-visible{ filter:brightness(1.12); outline:none; }
+  .bar-val{ width:52px; flex:none; font-size:11.5px; color:var(--ink-2); font-variant-numeric:tabular-nums; }
+
+  .rating-chart{ display:flex; flex-direction:column; gap:16px; }
+  .rating-row{ display:flex; align-items:center; gap:14px; }
+  .rating-row .label{ width:78px; flex:none; font-size:13px; font-weight:600; }
+  .rating-row .stack{
+    flex:1; display:flex; gap:2px; height:22px; border-radius:4px; overflow:hidden;
+    background:var(--page);
+  }
+  .rating-row .seg{ height:100%; }
+  .rating-row .seg:hover, .rating-row .seg:focus-visible{ filter:brightness(1.1); outline:none; }
+
+  #tip{
+    position:fixed; z-index:50; pointer-events:none; opacity:0; transform:translate(-50%,-100%);
+    background:var(--ink); color:var(--page); font-size:12px; line-height:1.4;
+    padding:7px 10px; border-radius:7px; max-width:260px; transition:opacity .1s ease;
+    box-shadow:0 6px 20px rgba(0,0,0,.18);
+  }
+  #tip.show{ opacity:1; }
+  #tip b{ font-variant-numeric:tabular-nums; }
+
+  .app-sub{ margin-top:28px; }
+  .app-sub h3{
+    font-size:16px; font-weight:700; margin:0 0 10px; display:flex; align-items:center; gap:8px;
+  }
+  .app-sub h3 .dot{ width:10px; height:10px; border-radius:50%; }
+  .chips{ display:flex; flex-wrap:wrap; gap:7px; margin-bottom:16px; }
+  .chip{
+    font-size:12px; color:var(--ink-2); background:var(--surface); border:1px solid var(--border);
+    padding:4px 10px; border-radius:99px; font-variant-numeric:tabular-nums;
+  }
+  .chip b{ color:var(--ink); font-weight:700; }
+
+  .quote-grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(300px,1fr)); gap:12px; }
+  .quote-card{
+    background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:14px 16px;
+    display:flex; flex-direction:column; gap:8px;
+  }
+  .quote-card .qmeta{ display:flex; align-items:center; gap:8px; font-size:11.5px; color:var(--muted); }
+  .quote-card .score{
+    font-weight:800; font-size:11.5px; padding:1px 7px; border-radius:5px;
+    background:color-mix(in srgb, var(--critical) 14%, transparent); color:var(--critical);
+  }
+  .quote-card .score.mid{ background:color-mix(in srgb, var(--warning) 22%, transparent); color:#8a5a00;}
+  .quote-card p{ font-size:13px; line-height:1.6; color:var(--ink); margin:0; max-width:38ch; }
+  .quote-card .tags{ display:flex; flex-wrap:wrap; gap:5px; margin-top:2px; }
+  .quote-card .tag{ font-size:10.5px; color:var(--ink-2); background:var(--page); border:1px solid var(--hairline); padding:1px 7px; border-radius:99px; }
+
+  .trend-wrap{ background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:18px 18px 8px; }
+  .trend-wrap svg{ width:100%; height:auto; display:block; }
+  .trend-note{ font-size:11.5px; color:var(--muted); margin-top:6px; min-height:1em; }
+
+  .version-table{ width:100%; border-collapse:collapse; font-size:12.5px; margin-top:14px; }
+  .version-table th, .version-table td{
+    text-align:left; padding:7px 10px; border-bottom:1px solid var(--hairline);
+  }
+  .version-table th{ color:var(--muted); font-weight:600; font-size:11.5px; }
+  .version-table td:last-child, .version-table th:last-child{ text-align:right; font-variant-numeric:tabular-nums; }
+
+  footer{
+    margin-top:56px; padding-top:20px; border-top:1px solid var(--hairline);
+    font-size:12px; color:var(--muted); line-height:1.7;
+  }
+
+  @media (max-width:720px){
+    .stat-grid{ grid-template-columns:1fr; }
+    .masthead h1{ font-size:26px; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header class="masthead">
+    <p class="eyebrow">Review Intelligence · Weekly Crawl Summary</p>
+    <h1>주간 리뷰 분석 리포트</h1>
+    <div class="meta">
+      <span>생성일 <b>2026-07-22</b></span>
+      <span>수집 스토어 <b>Google Play (KR / ko)</b></span>
+      <span>대상 <b>랭플릭스</b> · 스픽 · 듀오링고</span>
+      <span>수집 방식 <b>google-play-scraper, 최신순</b></span>
+    </div>
+  </header>
+
+  <section class="summary">
+    <h2 class="section-title">한눈에 보기</h2>
+    <p class="section-sub">각 앱의 구글플레이 한국어 리뷰를 최신순으로 수집한 결과입니다. 불만율은 별점 3점 이하 리뷰 비중입니다.</p>
+    <div class="stat-grid">
+
+      <div class="stat-card" style="--app-color:var(--duo)">
+        <div class="app-name"><span class="dot"></span>듀오링고</div>
+        <div class="hero">4.29<small>/5</small></div>
+        <div class="rows">
+          <div class="row"><span>수집 리뷰</span><b>800건</b></div>
+          <div class="row"><span>불만율(★≤3)</span><span class="pill warning">18.0%</span></div>
+          <div class="row"><span>수집 기간</span><span>2026-06-23 ~ 2026-07-20</span></div>
+        </div>
+      </div>
+
+      <div class="stat-card" style="--app-color:var(--speak)">
+        <div class="app-name"><span class="dot"></span>스픽</div>
+        <div class="hero">4.43<small>/5</small></div>
+        <div class="rows">
+          <div class="row"><span>수집 리뷰</span><b>800건</b></div>
+          <div class="row"><span>불만율(★≤3)</span><span class="pill good">14.8%</span></div>
+          <div class="row"><span>수집 기간</span><span>2026-03-11 ~ 2026-07-21</span></div>
+        </div>
+      </div>
+
+      <div class="stat-card" style="--app-color:var(--lang)">
+        <div class="app-name"><span class="dot"></span>랭플릭스 (자사)</div>
+        <div class="hero">4.01<small>/5</small></div>
+        <div class="rows">
+          <div class="row"><span>수집 리뷰</span><b>90건</b></div>
+          <div class="row"><span>불만율(★≤3)</span><span class="pill critical">31.1%</span></div>
+          <div class="row"><span>수집 기간</span><span>2025-05-20 ~ 2026-07-19</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="chart-section">
+    <h2 class="section-title">불만 카테고리 비교</h2>
+    <p class="section-sub">불만 리뷰(★3 이하) 중 각 카테고리 키워드가 언급된 비율입니다. 한 리뷰가 여러 카테고리에 동시에 잡힐 수 있어 앱별 합계는 100%가 아닙니다.</p>
+    <div class="legend">
+      <div class="item"><span class="swatch" style="background:var(--duo)"></span>듀오링고</div>
+      <div class="item"><span class="swatch" style="background:var(--speak)"></span>스픽</div>
+      <div class="item"><span class="swatch" style="background:var(--lang)"></span>랭플릭스</div>
+    </div>
+    <div class="cat-chart" id="catChart"></div>
+  </section>
+
+  <section class="chart-section">
+    <h2 class="section-title">별점 분포</h2>
+    <p class="section-sub">전체 수집 리뷰 기준 별점 비중입니다.</p>
+    <div class="legend">
+      <div class="item"><span class="swatch" style="background:var(--r1)"></span>1점</div>
+      <div class="item"><span class="swatch" style="background:var(--r2)"></span>2점</div>
+      <div class="item"><span class="swatch" style="background:var(--r3)"></span>3점</div>
+      <div class="item"><span class="swatch" style="background:var(--r4)"></span>4점</div>
+      <div class="item"><span class="swatch" style="background:var(--r5)"></span>5점</div>
+    </div>
+    <div class="rating-chart" id="ratingChart"></div>
+  </section>
+
+  <section class="app-block">
+    <h2 class="section-title">경쟁 앱 리뷰 동향</h2>
+    <p class="section-sub">공감수(👍) 상위 불만 리뷰 기준으로 정리했습니다.</p>
+
+    <div class="app-sub">
+      <h3><span class="dot" style="background:var(--duo)"></span>듀오링고</h3>
+      <div class="chips">
+        <span class="chip"><b>문제</b> 33</span>
+        <span class="chip"><b>단어</b> 22</span>
+        <span class="chip"><b>오류</b> 21</span>
+        <span class="chip"><b>버그</b> 19</span>
+        <span class="chip"><b>발음</b> 18</span>
+        <span class="chip"><b>결제</b> 16</span>
+        <span class="chip"><b>학습</b> 15</span>
+        <span class="chip"><b>공부</b> 14</span>
+      </div>
+      <div class="quote-grid">
+        <div class="quote-card">
+          <div class="qmeta"><span class="score">1점</span><span>2026-06-24</span><span>· 공감 9</span></div>
+          <p>일년넘게 듀오 이용중입니다. 그런데 월드컵 수트 이벤트 왜안되요 ㅜㅠ 누군 되고 누군 안되는 그런 이벤튼가요 ㅜㅠ 지워도보고 업데이트가 있나 확인도해밨지만 안되요 ㅜㅠ 체스 처음 나올때도 늦게 적용되더니 이번엔 이벤트가 아예안대여 ㅜ</p>
+          
+        </div>
+        <div class="quote-card">
+          <div class="qmeta"><span class="score">1점</span><span>2026-06-24</span><span>· 공감 9</span></div>
+          <p>재미로 접근하는 건 괜찮지만 내용이나 시스템 오류 많음 단계 진행이 자꾸 처음으로 돌아감 짜증나는 건 리더보드에 20분에 7,000xp / 1분에 30,000xp 올리는 cheater들이 판치는데 신고해도 매크로로 돌리는 부정행위자들처럼 자동답변만 오고 절대 처리 안 함. 유료 결제할 가치가 없음. 결제만 받고 회원들 관리는 안 하는 듯</p>
+          <div class="tags"><span class="tag">가격/구독</span><span class="tag">버그/오류</span><span class="tag">고객지원</span></div>
+        </div>
+        <div class="quote-card">
+          <div class="qmeta"><span class="score mid">3점</span><span>2026-06-28</span><span>· 공감 8</span></div>
+          <p>꾸준히 하고 있는대 자주 등장하는 이상한 문제나 정답들 문의해도 바뀐적이 없이 매번 똑같은 오류로 나오고, 공부 도중 에너지 있는대도 충전 또는 구독 안하면 경험치 포기뿐이고 어차피 사람들이 이용하니까 무시하는 느낌이 드네요.</p>
+          <div class="tags"><span class="tag">가격/구독</span><span class="tag">버그/오류</span><span class="tag">스트릭/동기부여</span><span class="tag">고객지원</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="app-sub">
+      <h3><span class="dot" style="background:var(--speak)"></span>스픽</h3>
+      <div class="chips">
+        <span class="chip"><b>인식</b> 34</span>
+        <span class="chip"><b>환불</b> 30</span>
+        <span class="chip"><b>결제</b> 28</span>
+        <span class="chip"><b>취소</b> 21</span>
+        <span class="chip"><b>구독</b> 19</span>
+        <span class="chip"><b>음성</b> 17</span>
+        <span class="chip"><b>대화</b> 15</span>
+        <span class="chip"><b>문제</b> 12</span>
+      </div>
+      <div class="quote-grid">
+        <div class="quote-card">
+          <div class="qmeta"><span class="score">1점</span><span>2026-03-13</span><span>· 공감 26</span></div>
+          <p>다시 리뷰 할게요 특정 단어 하나만 못 알아듣는 게 아니라 랜덤으로 인식이 안 되는 거였네요 앞에선 잘 얘기한 단어를 뒤에서 다시 말할 땐 갑자기 인식이 안 됩니다. 이게 무료 앱이었으면 저도 그냥 넘어갔을 겁니다. 근데 아니잖아요. 저 스픽을 이제 일주일밖에 안 썼습니다. 스피킹 위주로 공부하는 앱이 음성인식에 문제가 있는 게 말이 된다고 생각합니까? 다른 후기들 보면 이미 작년부터…</p>
+          <div class="tags"><span class="tag">광고</span></div>
+        </div>
+        <div class="quote-card">
+          <div class="qmeta"><span class="score">1점</span><span>2026-03-12</span><span>· 공감 22</span></div>
+          <p>요즘 유사 어플이 얼마나 많은데, 무슨 한탕 장사하고 접을 생각으로 운영하시나요? 일단 예고 된 갱신 일보다 하루 전에 선결제 되는 어플은 살면서 처음보고요.(하루전에 결제 될거란 고지를 해주는것도 아니고 무려 하루 전에 먼저 결제부터 해버림 ㅋㅋㅋ) 결제가 됐으면 어떤식으로든 영수증을 보내줘야지 돈이 허공에서 없어진 것도 아니고 돈은 빠져나갔는데, 그 어떤 수단으로도 영수증 확인은 안되고…</p>
+          <div class="tags"><span class="tag">가격/구독</span><span class="tag">스트릭/동기부여</span><span class="tag">고객지원</span></div>
+        </div>
+        <div class="quote-card">
+          <div class="qmeta"><span class="score">1점</span><span>2026-03-19</span><span>· 공감 21</span></div>
+          <p>저는 1년 넘게 프리토킹을 사용했습니다. 스픽에서 프로그램 업그레이드를 하고 있는것 같은데 최근들어 일주일 전후 (26.3)에 답변을 할때 녹음버튼을 누르고 말을 하는것으로 바뀐것 같습니다. 문제점은 1. 길게 대답하면 반응없음 2. 길게 대답하면 완전히 다른 한 문장으로 대체 어떻게해야 이전처럼 사용할 수있나요? 빠른 대답 부탁드립니다. 1년치 재결제했는데 이렇게는 사용 불가할듯 합니다.</p>
+          <div class="tags"><span class="tag">가격/구독</span><span class="tag">UX/사용성</span><span class="tag">고객지원</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="app-block">
+    <h2 class="section-title">자사 리뷰 분석 — 랭플릭스</h2>
+
+    <div class="trend-wrap">
+      <p class="section-sub" style="margin-bottom:10px;">월별 불만 리뷰(★3 이하) 건수</p>
+      <svg viewBox="0 0 600 160" id="trendSvg">
+        <line x1="30" y1="130" x2="570" y2="130" stroke="var(--hairline)" stroke-width="1"/>
+        <path d="M30.0,130 L30.0,116.34 L84.0,116.34 L138.0,61.68 L192.0,102.67 L246.0,102.67 L300.0,116.34 L354.0,116.34 L408.0,89.01 L462.0,116.34 L516.0,34.35 L570.0,75.34 L570.0,130 Z" fill="var(--lang)" opacity="0.1"/>
+        <polyline points="30.0,116.34 84.0,116.34 138.0,61.68 192.0,102.67 246.0,102.67 300.0,116.34 354.0,116.34 408.0,89.01 462.0,116.34 516.0,34.35 570.0,75.34" fill="none" stroke="var(--lang)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+        <g id="trendDots"></g>
+        <text x="516.0" y="24.35" text-anchor="middle" font-size="12" font-weight="700" fill="var(--ink)">7건 (최고)</text>
+        <text x="570.0" y="65.34" text-anchor="middle" font-size="11.5" font-weight="700" fill="var(--ink)">4건*</text>
+        <g font-size="9" fill="var(--muted)">
+          <text x="30.0" y="147" text-anchor="middle">25.05</text>
+          <text x="84.0" y="147" text-anchor="middle">25.09</text>
+          <text x="138.0" y="147" text-anchor="middle">25.11</text>
+          <text x="192.0" y="147" text-anchor="middle">25.12</text>
+          <text x="246.0" y="147" text-anchor="middle">26.01</text>
+          <text x="300.0" y="147" text-anchor="middle">26.02</text>
+          <text x="354.0" y="147" text-anchor="middle">26.03</text>
+          <text x="408.0" y="147" text-anchor="middle">26.04</text>
+          <text x="462.0" y="147" text-anchor="middle">26.05</text>
+          <text x="516.0" y="147" text-anchor="middle">26.06</text>
+          <text x="570.0" y="147" text-anchor="middle">26.07</text>
+        </g>
+      </svg>
+      <p class="trend-note">* 2026-07은 2026-07-19까지 수집된 부분 데이터입니다.</p>
+    </div>
+
+    <table class="version-table">
+      <thead><tr><th>버전</th><th>불만 리뷰 수</th></tr></thead>
+      <tbody>
+        <tr><td>1.6.24</td><td>5건</td></tr>
+        <tr><td>1.6.41</td><td>3건</td></tr>
+        <tr><td>1.6.35</td><td>3건</td></tr>
+        <tr><td>1.6.30</td><td>2건</td></tr>
+        <tr><td>1.6.40</td><td>2건</td></tr>
+      </tbody>
+    </table>
+
+    <div class="app-sub">
+      <div class="chips">
+        <span class="chip"><b>오류</b> 16</span>
+        <span class="chip"><b>업데이트</b> 13</span>
+        <span class="chip"><b>학습</b> 12</span>
+        <span class="chip"><b>영상</b> 12</span>
+        <span class="chip"><b>결제</b> 10</span>
+        <span class="chip"><b>유료</b> 10</span>
+        <span class="chip"><b>기능</b> 9</span>
+        <span class="chip"><b>반복</b> 7</span>
+      </div>
+      <div class="quote-grid">
+        <div class="quote-card">
+          <div class="qmeta"><span class="score mid">3점</span><span>2025-11-30</span><span>· 공감 13</span></div>
+          <p>매일 자기전 랭플릭스로 공부하고 자는게 낙이였는데 갑자기 거의 모든게 유료화 되어버렸네요... 기존 사용자들을 위해 유료구독 하지 않아도 기본 기능은 사용할 수 있었으면 좋았을 것 같은데 많이 아쉽습니다 거의 모든 기능이 유료결제 하지않으면 사용할 수 없게 되었네요 하루 복습만이라도 무료이용이 가능했다면 어땠을까하는 아쉬움이 남습니다</p>
+          <div class="tags"><span class="tag">가격/구독</span></div>
+        </div>
+        <div class="quote-card">
+          <div class="qmeta"><span class="score mid">3점</span><span>2025-11-30</span><span>· 공감 13</span></div>
+          <p>무료로 매일 영화 속 대사로 단어와 숙어, 일상에서는 어떻게 활용되는지까지 학습할 수 있어서 너무 잘 쓰고 있었습니다. 다만 오늘(27일)부터 앱이 업데이트가 되었는지 갑자기 '일상에선 이렇게 말해요'랑 학습도 2개만 가능하고 더 하고싶으면 멤버십 결제를 해야하네요.... 잘쓰고 있는 어플이었는데 갑작스럽게 유료화되어서 당황스러워요 업데이트 전에 미리 공지를 해주셨으면 어땠을까하는 아쉬움이…</p>
+          <div class="tags"><span class="tag">가격/구독</span></div>
+        </div>
+        <div class="quote-card">
+          <div class="qmeta"><span class="score">1점</span><span>2025-12-30</span><span>· 공감 11</span></div>
+          <p>이번 달에만 3번을 앱이 작동을 안 해서 앱 사용을 못했습니다. 지금도 그렇고요. 유료 결제까지 해서 사용하고 있는데 앱을 쓰지를 못하면 조치라도 취해주셔야 하는게 아닌가요? 아무 공지도 사과도 없고 운영을 왜 이렇게 하시는지 모르겠네요. 빠른 복구 부탁드립니다.</p>
+          <div class="tags"><span class="tag">가격/구독</span></div>
+        </div>
+        <div class="quote-card">
+          <div class="qmeta"><span class="score mid">3점</span><span>2025-11-29</span><span>· 공감 6</span></div>
+          <p>최근에 이 앱을 알게되어서 이주 안되게 사용하고 있었는데 갑작스러운 유료전환은 아쉬워요ㅠㅠ 공지라도 있었으면 좋았겠다는 생각이 드네요 .. 사실상 무료로는 아무기능도 사용하지 못하게 다 막혀버려서.. 타 어플에 비해 구독료도 저렴한 편이 아니라 아쉽게 느껴져요 중간중간 오류도 꽤 있어서(음성 안들림, 버튼 안눌림 등) 결제까지 해야될 지 더 고민되네요...</p>
+          <div class="tags"><span class="tag">가격/구독</span><span class="tag">버그/오류</span><span class="tag">UX/사용성</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div>수집: Google Play 리뷰 · 언어 ko / 국가 kr · <code>google-play-scraper</code>, 최신순 정렬 기준</div>
+    <div>분석 대상: 듀오링고 800건 · 스픽 800건 · 랭플릭스 90건</div>
+    <div>수집 기간: 듀오링고 2026-06-23 ~ 2026-07-20 · 스픽 2026-03-11 ~ 2026-07-21 · 랭플릭스 2025-05-20 ~ 2026-07-19</div>
+    <div>카테고리 분류는 리뷰 원문 키워드 매칭 기반이며, 다중 카테고리에 동시에 해당될 수 있습니다.</div>
+  </footer>
+
+</div>
+
+<div id="tip"></div>
+<script>
+(function(){
+  const tip = document.getElementById('tip');
+  function showTip(el, text){
+    tip.textContent = text;
+    tip.classList.add('show');
+    const r = el.getBoundingClientRect();
+    tip.style.left = (r.left + r.width/2) + 'px';
+    tip.style.top = (r.top - 8) + 'px';
+  }
+  function hideTip(){ tip.classList.remove('show'); }
+
+  const CAT_DATA = [["가격/구독", [10.4, 27.1, 42.9], [15, 32, 12]], ["버그/오류", [22.9, 5.1, 42.9], [33, 6, 12]], ["고객지원", [8.3, 20.3, 10.7], [12, 24, 3]], ["UX/사용성", [6.9, 9.3, 21.4], [10, 11, 6]], ["AI/튜터", [11.8, 16.9, 3.6], [17, 20, 1]], ["광고", [3.5, 7.6, 7.1], [5, 9, 2]], ["스트릭/동기부여", [12.5, 1.7, 3.6], [18, 2, 1]], ["학습효과", [0.7, 1.7, 0.0], [1, 2, 0]]];
+  const APP_NAMES = ["듀오링고","스픽","랭플릭스"];
+  const APP_VARS = ["--duo","--speak","--lang"];
+  const DOMAIN_MAX = 45;
+  const catChart = document.getElementById('catChart');
+  CAT_DATA.forEach(([label, pcts, counts]) => {
+    const row = document.createElement('div');
+    row.className = 'cat-row';
+    const lab = document.createElement('div');
+    lab.className = 'cat-label';
+    lab.textContent = label;
+    row.appendChild(lab);
+    const bars = document.createElement('div');
+    bars.className = 'cat-bars';
+    pcts.forEach((pct, i) => {
+      const track = document.createElement('div');
+      track.className = 'cat-bar-track';
+      const scale = document.createElement('div');
+      scale.className = 'scale';
+      const bar = document.createElement('div');
+      bar.className = 'bar';
+      bar.style.width = Math.min(100, pct/DOMAIN_MAX*100) + '%';
+      bar.style.background = 'var(' + APP_VARS[i] + ')';
+      bar.tabIndex = 0;
+      const tipText = APP_NAMES[i] + ' · ' + label + ' · ' + pct + '% (' + counts[i] + '건)';
+      bar.addEventListener('pointerenter', () => showTip(bar, tipText));
+      bar.addEventListener('pointerleave', hideTip);
+      bar.addEventListener('focus', () => showTip(bar, tipText));
+      bar.addEventListener('blur', hideTip);
+      scale.appendChild(bar);
+      const val = document.createElement('span');
+      val.className = 'bar-val';
+      val.textContent = pct + '%';
+      track.appendChild(scale);
+      track.appendChild(val);
+      bars.appendChild(track);
+    });
+    row.appendChild(bars);
+    catChart.appendChild(row);
+  });
+
+  const RATING_DATA = [["듀오링고", "--duo", [10.2, 2.8, 5.0, 11.4, 70.6], [82, 22, 40, 91, 565]], ["스픽", "--speak", [9.0, 1.6, 4.1, 8.1, 77.1], [72, 13, 33, 65, 617]], ["랭플릭스", "--lang", [11.1, 8.9, 11.1, 5.6, 63.3], [10, 8, 10, 5, 57]]];
+  const RATING_VARS = ["--r1","--r2","--r3","--r4","--r5"];
+  const ratingChart = document.getElementById('ratingChart');
+  RATING_DATA.forEach(([name, appVar, pcts, counts]) => {
+    const row = document.createElement('div');
+    row.className = 'rating-row';
+    const lab = document.createElement('div');
+    lab.className = 'label';
+    lab.textContent = name;
+    row.appendChild(lab);
+    const stack = document.createElement('div');
+    stack.className = 'stack';
+    pcts.forEach((pct, i) => {
+      const seg = document.createElement('div');
+      seg.className = 'seg';
+      seg.style.width = pct + '%';
+      seg.style.background = 'var(' + RATING_VARS[i] + ')';
+      seg.tabIndex = 0;
+      const tipText = name + ' · ' + (i+1) + '점 · ' + pct + '% (' + counts[i] + '건)';
+      seg.addEventListener('pointerenter', () => showTip(seg, tipText));
+      seg.addEventListener('pointerleave', hideTip);
+      seg.addEventListener('focus', () => showTip(seg, tipText));
+      seg.addEventListener('blur', hideTip);
+      stack.appendChild(seg);
+    });
+    row.appendChild(stack);
+    ratingChart.appendChild(row);
+  });
+
+  const TREND = [["25.05", 1, 30.0, 116.34], ["25.09", 1, 84.0, 116.34], ["25.11", 5, 138.0, 61.68], ["25.12", 2, 192.0, 102.67], ["26.01", 2, 246.0, 102.67], ["26.02", 1, 300.0, 116.34], ["26.03", 1, 354.0, 116.34], ["26.04", 3, 408.0, 89.01], ["26.05", 1, 462.0, 116.34], ["26.06", 7, 516.0, 34.35], ["26.07", 4, 570.0, 75.34]];
+  const ns = 'http://www.w3.org/2000/svg';
+  const dotsG = document.getElementById('trendDots');
+  TREND.forEach(([label, val, x, y]) => {
+    const c = document.createElementNS(ns, 'circle');
+    c.setAttribute('cx', x); c.setAttribute('cy', y); c.setAttribute('r', 8);
+    c.setAttribute('fill', 'transparent');
+    c.setAttribute('tabindex', '0');
+    c.style.cursor = 'pointer';
+    const dot = document.createElementNS(ns, 'circle');
+    dot.setAttribute('cx', x); dot.setAttribute('cy', y); dot.setAttribute('r', 3.5);
+    dot.setAttribute('fill', 'var(--lang)');
+    dot.setAttribute('stroke', 'var(--surface)');
+    dot.setAttribute('stroke-width', '2');
+    dotsG.appendChild(dot);
+    dotsG.appendChild(c);
+    const tipText = '20' + label.replace('.','년 ') + '월 · 불만 ' + val + '건';
+    c.addEventListener('pointerenter', () => showTip(c, tipText));
+    c.addEventListener('pointerleave', hideTip);
+    c.addEventListener('focus', () => showTip(c, tipText));
+    c.addEventListener('blur', hideTip);
+  });
+})();
+</script>
+</body>
+</html>
