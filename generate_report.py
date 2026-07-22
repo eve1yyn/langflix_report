@@ -25,6 +25,10 @@ CATEGORY_ORDER = [
 QUOTE_COUNT = {"duolingo": 3, "speak": 3, "langflix": 4}
 CHIP_COUNT = 8
 
+ICON_CHAT = '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 4.5h14v9H7.5L4 16.5V13.5H3z" stroke-linejoin="round"/></svg>'
+ICON_ALERT = '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M10 3 L18 17 H2 Z"/><line x1="10" y1="8" x2="10" y2="11.5"/><circle cx="10" cy="14" r="0.9" fill="currentColor" stroke="none"/></svg>'
+ICON_CALENDAR = '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="14" height="13" rx="1.5"/><line x1="3" y1="8" x2="17" y2="8"/><line x1="7" y1="2.5" x2="7" y2="5.5"/><line x1="13" y1="2.5" x2="13" y2="5.5"/></svg>'
+
 
 def load_summary():
     with open("output/summary.json", encoding="utf-8") as f:
@@ -72,9 +76,9 @@ def build_stat_cards(summary):
         <div class="app-name"><span class="dot"></span>{escape_html(app['app_name'])}{own_tag}</div>
         <div class="hero">{app['avg_score']}<small>/5</small></div>
         <div class="rows">
-          <div class="row"><span>수집 리뷰</span><b>{app['total_count']}건</b></div>
-          <div class="row"><span>불만율(★≤3)</span><span class="pill {pill}">{rate}%</span></div>
-          <div class="row"><span>수집 기간</span><span>{fmt_range(app['date_range'])}</span></div>
+          <div class="row"><span class="lbl">{ICON_CHAT}<span>수집 리뷰</span></span><b>{app['total_count']}건</b></div>
+          <div class="row"><span class="lbl">{ICON_ALERT}<span>불만율(★≤3)</span></span><span class="pill {pill}">{rate}%</span></div>
+          <div class="row"><span class="lbl">{ICON_CALENDAR}<span>수집 기간</span></span><span>{fmt_range(app['date_range'])}</span></div>
         </div>
       </div>""")
     return "\n".join(cards)
@@ -198,6 +202,53 @@ def build_trend(app):
     return trend_json, poly_str, area_str, labels_svg, marks_svg, note, baseline_y
 
 
+def build_summary_paragraphs(summary):
+    own = summary[OWN_APP]
+    own_rate = round(own["complaint_count"] / own["total_count"] * 100, 1)
+    own_top = own["category_summary"][0]
+    own_top_pct = (
+        round(own_top["complaint_count"] / own["complaint_count"] * 100, 1)
+        if own["complaint_count"] else 0
+    )
+
+    comp_sentences = []
+    for key in ["duolingo", "speak"]:
+        app = summary[key]
+        rate = round(app["complaint_count"] / app["total_count"] * 100, 1)
+        top = app["category_summary"][0]
+        top_pct = (
+            round(top["complaint_count"] / app["complaint_count"] * 100, 1)
+            if app["complaint_count"] else 0
+        )
+        comp_sentences.append(
+            f"{app['app_name']}은 평균 {app['avg_score']}점, 불만율 {rate}%이며 "
+            f"최다 불만 카테고리는 '{top['category']}'({top_pct}%)입니다."
+        )
+
+    paragraphs = [
+        "<p>이번 리포트는 구글플레이 최신 리뷰를 기준으로 랭플릭스와 경쟁 앱(스픽, 듀오링고)의 리뷰 동향을 정리한 것입니다.</p>",
+        (
+            f"<p>랭플릭스는 평균 별점 <b>{own['avg_score']}</b>점, 불만율 <b>{own_rate}%</b>이며, "
+            f"가장 많이 제기된 불만은 '{own_top['category']}'({own_top_pct}%)입니다.</p>"
+        ),
+        "<p>" + " ".join(comp_sentences) + "</p>",
+    ]
+    return "\n".join(paragraphs)
+
+
+def build_period_note(summary):
+    parts = [
+        f"{summary[k]['app_name']} {fmt_range(summary[k]['date_range'])} ({summary[k]['total_count']}건)"
+        for k in APP_ORDER
+    ]
+    ranges_str = " · ".join(parts)
+    return (
+        f"수집 기준은 앱별 최신 리뷰 최대 800건입니다(랭플릭스는 리뷰 수가 적어 전체 "
+        f"{summary[OWN_APP]['total_count']}건을 모두 포함). 리뷰가 자주 달리는 앱일수록 800건이 더 짧은 "
+        f"기간에 몰려 있어 앱마다 실제 수집 기간이 다릅니다 — {ranges_str}."
+    )
+
+
 def build_version_table(app, n=5):
     rows = app["version_trend"][:n]
     return "\n".join(
@@ -220,13 +271,11 @@ def main():
         template = f.read()
 
     own = summary[OWN_APP]
-    meta_ranges = " · ".join(
-        f"{summary[k]['app_name']} {fmt_range(summary[k]['date_range'])}" for k in APP_ORDER
-    )
 
     html = (
         template.replace("__GEN_DATE__", date.today().isoformat())
-        .replace("__META_RANGES__", meta_ranges)
+        .replace("__SUMMARY_PARAGRAPHS__", build_summary_paragraphs(summary))
+        .replace("__PERIOD_NOTE__", build_period_note(summary))
         .replace("__STAT_CARDS__", stat_cards)
         .replace("__CAT_DATA_JSON__", json.dumps(cat_rows, ensure_ascii=False))
         .replace("__DOMAIN_MAX__", str(domain_max))
@@ -251,13 +300,6 @@ def main():
         .replace("__SPEAK_QUOTES__", build_quote_cards(summary["speak"], QUOTE_COUNT["speak"]))
         .replace("__LANG_QUOTES__", build_quote_cards(own, QUOTE_COUNT["langflix"]))
         .replace("__VERSION_ROWS__", build_version_table(own))
-        .replace(
-            "__FOOTER_COUNTS__",
-            " · ".join(
-                f"{summary[k]['app_name']} {summary[k]['total_count']}건"
-                for k in APP_ORDER
-            ),
-        )
     )
 
     with open("index.html", "w", encoding="utf-8") as f:

@@ -4,18 +4,24 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>주간 리뷰 분석 리포트 — 랭플릭스</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" as="style" crossorigin
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.css" />
 <style>
   :root{
-    color-scheme: light;
-    --page:      #f9f9f7;
-    --surface:   #fcfcfb;
-    --ink:       #0b0b0b;
-    --ink-2:     #52514e;
-    --muted:     #898781;
-    --hairline:  #e1e0d9;
-    --border:    rgba(11,11,11,0.10);
+    --page:      #f6f7f5;
+    --sidebar:   #ffffff;
+    --surface:   #ffffff;
+    --ink:       #14140f;
+    --ink-2:     #55564d;
+    --muted:     #8d8e83;
+    --hairline:  #e7e8e1;
+    --border:    rgba(20,20,15,0.08);
+    --shadow:    0 1px 2px rgba(20,20,15,0.04), 0 8px 24px rgba(20,20,15,0.05);
+
     --accent:    #1baf7a;
-    --accent-ink:#0a6b48;
+    --accent-ink:#0a7a53;
+    --accent-wash: rgba(27,175,122,0.10);
 
     --duo:       #2a78d6;
     --speak:     #eb6834;
@@ -23,59 +29,7 @@
 
     --r1: #86b6ef; --r2: #5598e7; --r3: #2a78d6; --r4: #1c5cab; --r5: #104281;
 
-    --good: #0ca30c; --warning:#fab219; --critical:#d03b3b;
-  }
-  @media (prefers-color-scheme: dark){
-    :root:where(:not([data-theme="light"])){
-      color-scheme: dark;
-      --page:      #0d0d0d;
-      --surface:   #1a1a19;
-      --ink:       #ffffff;
-      --ink-2:     #c3c2b7;
-      --muted:     #898781;
-      --hairline:  #2c2c2a;
-      --border:    rgba(255,255,255,0.10);
-      --accent:    #199e70;
-      --accent-ink:#5cd9ab;
-
-      --duo:   #3987e5;
-      --speak: #d95926;
-      --lang:  #199e70;
-
-      --r1: #104281; --r2: #1c5cab; --r3: #2a78d6; --r4: #5598e7; --r5: #86b6ef;
-    }
-  }
-  :root[data-theme="dark"]{
-    color-scheme: dark;
-    --page:      #0d0d0d;
-    --surface:   #1a1a19;
-    --ink:       #ffffff;
-    --ink-2:     #c3c2b7;
-    --muted:     #898781;
-    --hairline:  #2c2c2a;
-    --border:    rgba(255,255,255,0.10);
-    --accent:    #199e70;
-    --accent-ink:#5cd9ab;
-    --duo:   #3987e5;
-    --speak: #d95926;
-    --lang:  #199e70;
-    --r1: #104281; --r2: #1c5cab; --r3: #2a78d6; --r4: #5598e7; --r5: #86b6ef;
-  }
-  :root[data-theme="light"]{
-    color-scheme: light;
-    --page:      #f9f9f7;
-    --surface:   #fcfcfb;
-    --ink:       #0b0b0b;
-    --ink-2:     #52514e;
-    --muted:     #898781;
-    --hairline:  #e1e0d9;
-    --border:    rgba(11,11,11,0.10);
-    --accent:    #1baf7a;
-    --accent-ink:#0a6b48;
-    --duo:   #2a78d6;
-    --speak: #eb6834;
-    --lang:  #1baf7a;
-    --r1: #86b6ef; --r2: #5598e7; --r3: #2a78d6; --r4: #1c5cab; --r5: #104281;
+    --good: #0ca30c; --warning:#b5790a; --critical:#d03b3b;
   }
 
   *{ box-sizing:border-box; }
@@ -87,49 +41,105 @@
                  'Malgun Gothic', 'Apple SD Gothic Neo', system-ui, sans-serif;
     -webkit-font-smoothing:antialiased;
   }
-  .page{ max-width: 980px; margin: 0 auto; padding: 48px 24px 80px; }
+  :focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
 
-  .eyebrow{
-    font-size:11px; font-weight:700; letter-spacing:.14em; text-transform:uppercase;
-    color:var(--accent-ink); margin:0 0 10px;
-  }
-  .masthead h1{
-    font-size: 32px; font-weight:800; letter-spacing:-0.01em; margin:0 0 10px;
-    text-wrap:balance;
-  }
-  .masthead .meta{
-    display:flex; flex-wrap:wrap; gap:6px 18px; color:var(--ink-2); font-size:13.5px;
-    padding-bottom:22px; border-bottom:1px solid var(--hairline);
-  }
-  .masthead .meta b{ color:var(--ink); font-weight:600; }
+  .app-shell{ display:flex; min-height:100vh; align-items:stretch; }
 
-  .section-title{
-    font-size:19px; font-weight:700; margin: 0 0 4px; letter-spacing:-0.005em;
+  /* ---------- sidebar ---------- */
+  .sidebar{
+    width:240px; flex:none; background:var(--sidebar); border-right:1px solid var(--hairline);
+    padding:22px 14px; display:flex; flex-direction:column; gap:22px;
+    position:sticky; top:0; height:100vh; overflow-y:auto;
   }
-  .section-sub{ font-size:13px; color:var(--muted); margin:0 0 18px; max-width:64ch; line-height:1.55; }
-  section{ margin-top:44px; }
+  .brand{ display:flex; align-items:center; gap:10px; padding:2px 10px; }
+  .brand .mark{
+    width:32px; height:32px; border-radius:9px; background:var(--accent); color:#fff;
+    display:flex; align-items:center; justify-content:center; font-weight:800; font-size:14px; flex:none;
+  }
+  .brand .txt .name{ font-size:13.5px; font-weight:700; line-height:1.25; }
+  .brand .txt .sub{ font-size:11px; color:var(--muted); letter-spacing:.02em; }
 
+  .nav{ display:flex; flex-direction:column; gap:2px; }
+  .nav-label{ font-size:11px; font-weight:700; color:var(--muted); letter-spacing:.08em; text-transform:uppercase; padding:0 12px; margin-bottom:6px; }
+  .nav button{
+    all:unset; display:flex; align-items:center; gap:10px; padding:9px 12px; border-radius:9px;
+    font-size:13.5px; font-weight:600; color:var(--ink-2); cursor:pointer; position:relative;
+  }
+  .nav button svg{ width:18px; height:18px; flex:none; color:var(--muted); }
+  .nav button:hover{ background:#f2f3ef; }
+  .nav button.active{ background:var(--accent-wash); color:var(--accent-ink); }
+  .nav button.active svg{ color:var(--accent); }
+  .nav button.active::before{
+    content:""; position:absolute; left:-14px; top:8px; bottom:8px; width:3px; border-radius:3px; background:var(--accent);
+  }
+
+  .sidebar-foot{ margin-top:auto; padding:10px 12px; font-size:11px; color:var(--muted); line-height:1.6; }
+
+  /* ---------- main ---------- */
+  .main{ flex:1; min-width:0; }
+  .topbar{
+    position:sticky; top:0; z-index:5; background:rgba(246,247,245,0.88); backdrop-filter:blur(6px);
+    border-bottom:1px solid var(--hairline);
+    padding:18px 32px; display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;
+  }
+  .topbar h1{ font-size:19px; font-weight:800; margin:0; letter-spacing:-0.005em; }
+  .topbar .pills{ display:flex; gap:8px; flex-wrap:wrap; }
+  .topbar .pill{
+    font-size:11.5px; font-weight:600; color:var(--ink-2); background:var(--surface);
+    border:1px solid var(--border); padding:4px 10px; border-radius:99px;
+  }
+
+  .content{ padding:28px 32px 80px; max-width:1040px; }
+  .panel{ display:none; }
+  .panel.active{ display:block; animation:fade .18s ease; }
+  @media (prefers-reduced-motion: reduce){ .panel.active{ animation:none; } }
+  @keyframes fade{ from{ opacity:0; transform:translateY(4px);} to{ opacity:1; transform:none; } }
+
+  .section-title{ font-size:18px; font-weight:700; margin:0 0 10px; letter-spacing:-0.005em; }
+  .section-sub p{ font-size:13px; color:var(--muted); margin:0 0 4px; line-height:1.6; }
+  .section-sub{ margin-bottom:18px; }
+  section + section{ margin-top:38px; }
+
+  /* overview summary */
+  .summary-card{
+    background:var(--surface); border:1px solid var(--border); border-radius:14px; box-shadow:var(--shadow);
+    padding:20px 22px; margin-bottom:24px;
+  }
+  .summary-card p{ font-size:14px; line-height:1.75; color:var(--ink); margin:0 0 10px; }
+  .summary-card p:last-child{ margin-bottom:0; }
+  .summary-card p b{ font-variant-numeric:tabular-nums; }
+  .note{
+    font-size:12px; color:var(--muted); line-height:1.6; margin-top:14px; padding-top:14px;
+    border-top:1px dashed var(--hairline);
+  }
+
+  /* stat cards */
   .stat-grid{ display:grid; grid-template-columns: repeat(3,1fr); gap:14px; }
   .stat-card{
-    background:var(--surface); border:1px solid var(--border); border-radius:10px;
-    padding:18px 18px 16px; border-top:3px solid var(--app-color);
+    background:var(--surface); border:1px solid var(--border); border-radius:14px; box-shadow:var(--shadow);
+    padding:18px 18px 16px;
   }
-  .stat-card .app-name{ font-size:13.5px; font-weight:700; margin-bottom:10px; display:flex; align-items:center; gap:7px;}
-  .stat-card .app-name .dot{ width:9px;height:9px;border-radius:50%; background:var(--app-color); flex:none; }
-  .stat-card .hero{ font-size:34px; font-weight:800; line-height:1; }
-  .stat-card .hero small{ font-size:16px; font-weight:600; color:var(--muted); }
-  .stat-card .rows{ margin-top:12px; display:flex; flex-direction:column; gap:6px; font-size:12.5px; color:var(--ink-2); }
-  .stat-card .rows .row{ display:flex; justify-content:space-between; gap:10px; }
+  .stat-card .app-name{ font-size:13.5px; font-weight:700; margin-bottom:12px; display:flex; align-items:center; gap:8px;}
+  .stat-card .app-name .dot{ width:10px;height:10px;border-radius:3px; background:var(--app-color); flex:none; }
+  .stat-card .hero{ font-size:32px; font-weight:800; line-height:1; }
+  .stat-card .hero small{ font-size:15px; font-weight:600; color:var(--muted); }
+  .stat-card .rows{ margin-top:14px; display:flex; flex-direction:column; gap:8px; font-size:12.5px; color:var(--ink-2); }
+  .stat-card .rows .row{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
+  .stat-card .rows .row .lbl{ display:flex; align-items:center; gap:6px; }
+  .stat-card .rows .row svg{ width:14px; height:14px; color:var(--muted); flex:none; }
   .pill{
     display:inline-flex; align-items:center; gap:5px; padding:2px 8px; border-radius:99px;
     font-size:11.5px; font-weight:700; font-variant-numeric:tabular-nums;
   }
-  .pill.good{ background:color-mix(in srgb, var(--good) 16%, transparent); color:var(--good); }
-  .pill.warning{ background:color-mix(in srgb, var(--warning) 22%, transparent); color:#8a5a00; }
-  @media (prefers-color-scheme:dark){ .pill.warning{ color:#ffcf6b; } }
-  :root[data-theme="dark"] .pill.warning{ color:#ffcf6b; }
-  .pill.critical{ background:color-mix(in srgb, var(--critical) 16%, transparent); color:var(--critical); }
+  .pill.good{ background:rgba(12,163,12,0.13); color:var(--good); }
+  .pill.warning{ background:rgba(181,121,10,0.14); color:var(--warning); }
+  .pill.critical{ background:rgba(208,59,59,0.13); color:var(--critical); }
 
+  /* chart cards */
+  .chart-card{
+    background:var(--surface); border:1px solid var(--border); border-radius:14px; box-shadow:var(--shadow);
+    padding:20px 22px;
+  }
   .legend{ display:flex; flex-wrap:wrap; gap:16px; margin-bottom:16px; }
   .legend .item{ display:flex; align-items:center; gap:7px; font-size:12.5px; color:var(--ink-2); }
   .legend .swatch{ width:10px; height:10px; border-radius:2px; }
@@ -139,107 +149,140 @@
   .cat-row .cat-bars{ display:flex; flex-direction:column; gap:4px; }
   .cat-bar-track{ display:flex; align-items:center; gap:10px; height:14px; }
   .cat-bar-track .scale{ position:relative; flex:1; height:10px; background:transparent; }
-  .bar{
-    position:absolute; left:0; top:0; height:10px; border-radius:0 4px 4px 0;
-    transition: filter .12s ease;
-  }
+  .bar{ position:absolute; left:0; top:0; height:10px; border-radius:0 4px 4px 0; transition: filter .12s ease; }
   .bar:hover, .bar:focus-visible{ filter:brightness(1.12); outline:none; }
   .bar-val{ width:52px; flex:none; font-size:11.5px; color:var(--ink-2); font-variant-numeric:tabular-nums; }
 
   .rating-chart{ display:flex; flex-direction:column; gap:16px; }
   .rating-row{ display:flex; align-items:center; gap:14px; }
   .rating-row .label{ width:78px; flex:none; font-size:13px; font-weight:600; }
-  .rating-row .stack{
-    flex:1; display:flex; gap:2px; height:22px; border-radius:4px; overflow:hidden;
-    background:var(--page);
-  }
+  .rating-row .stack{ flex:1; display:flex; gap:2px; height:22px; border-radius:4px; overflow:hidden; background:var(--page); }
   .rating-row .seg{ height:100%; }
   .rating-row .seg:hover, .rating-row .seg:focus-visible{ filter:brightness(1.1); outline:none; }
 
   #tip{
     position:fixed; z-index:50; pointer-events:none; opacity:0; transform:translate(-50%,-100%);
-    background:var(--ink); color:var(--page); font-size:12px; line-height:1.4;
+    background:var(--ink); color:#fff; font-size:12px; line-height:1.4;
     padding:7px 10px; border-radius:7px; max-width:260px; transition:opacity .1s ease;
     box-shadow:0 6px 20px rgba(0,0,0,.18);
   }
   #tip.show{ opacity:1; }
-  #tip b{ font-variant-numeric:tabular-nums; }
 
-  .app-sub{ margin-top:28px; }
-  .app-sub h3{
-    font-size:16px; font-weight:700; margin:0 0 10px; display:flex; align-items:center; gap:8px;
-  }
-  .app-sub h3 .dot{ width:10px; height:10px; border-radius:50%; }
+  /* app sections */
+  .app-sub + .app-sub{ margin-top:30px; }
+  .app-sub h3{ font-size:15.5px; font-weight:700; margin:0 0 12px; display:flex; align-items:center; gap:8px; }
+  .app-sub h3 .dot{ width:10px; height:10px; border-radius:3px; }
   .chips{ display:flex; flex-wrap:wrap; gap:7px; margin-bottom:16px; }
   .chip{
-    font-size:12px; color:var(--ink-2); background:var(--surface); border:1px solid var(--border);
+    font-size:12px; color:var(--ink-2); background:var(--page); border:1px solid var(--border);
     padding:4px 10px; border-radius:99px; font-variant-numeric:tabular-nums;
   }
   .chip b{ color:var(--ink); font-weight:700; }
 
   .quote-grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(300px,1fr)); gap:12px; }
   .quote-card{
-    background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:14px 16px;
+    background:var(--page); border:1px solid var(--border); border-radius:12px; padding:14px 16px;
     display:flex; flex-direction:column; gap:8px;
   }
   .quote-card .qmeta{ display:flex; align-items:center; gap:8px; font-size:11.5px; color:var(--muted); }
-  .quote-card .score{
-    font-weight:800; font-size:11.5px; padding:1px 7px; border-radius:5px;
-    background:color-mix(in srgb, var(--critical) 14%, transparent); color:var(--critical);
-  }
-  .quote-card .score.mid{ background:color-mix(in srgb, var(--warning) 22%, transparent); color:#8a5a00;}
+  .quote-card .score{ font-weight:800; font-size:11.5px; padding:1px 7px; border-radius:5px; background:rgba(208,59,59,0.12); color:var(--critical); }
+  .quote-card .score.mid{ background:rgba(181,121,10,0.14); color:var(--warning); }
   .quote-card p{ font-size:13px; line-height:1.6; color:var(--ink); margin:0; max-width:38ch; }
   .quote-card .tags{ display:flex; flex-wrap:wrap; gap:5px; margin-top:2px; }
-  .quote-card .tag{ font-size:10.5px; color:var(--ink-2); background:var(--page); border:1px solid var(--hairline); padding:1px 7px; border-radius:99px; }
+  .quote-card .tag{ font-size:10.5px; color:var(--ink-2); background:var(--surface); border:1px solid var(--hairline); padding:1px 7px; border-radius:99px; }
 
-  .trend-wrap{ background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:18px 18px 8px; }
   .trend-wrap svg{ width:100%; height:auto; display:block; }
   .trend-note{ font-size:11.5px; color:var(--muted); margin-top:6px; min-height:1em; }
 
-  .version-table{ width:100%; border-collapse:collapse; font-size:12.5px; margin-top:14px; }
-  .version-table th, .version-table td{
-    text-align:left; padding:7px 10px; border-bottom:1px solid var(--hairline);
-  }
+  .version-table{ width:100%; border-collapse:collapse; font-size:12.5px; margin-top:16px; }
+  .version-table th, .version-table td{ text-align:left; padding:7px 10px; border-bottom:1px solid var(--hairline); }
   .version-table th{ color:var(--muted); font-weight:600; font-size:11.5px; }
   .version-table td:last-child, .version-table th:last-child{ text-align:right; font-variant-numeric:tabular-nums; }
 
-  footer{
-    margin-top:56px; padding-top:20px; border-top:1px solid var(--hairline);
-    font-size:12px; color:var(--muted); line-height:1.7;
-  }
-
-  @media (max-width:720px){
+  @media (max-width: 880px){
+    .app-shell{ flex-direction:column; }
+    .sidebar{ position:relative; width:100%; height:auto; flex-direction:row; align-items:center; overflow-x:auto; padding:12px 14px; }
+    .brand{ flex:none; }
+    .nav{ flex-direction:row; }
+    .nav-label{ display:none; }
+    .sidebar-foot{ display:none; }
     .stat-grid{ grid-template-columns:1fr; }
-    .masthead h1{ font-size:26px; }
+    .content{ padding:22px 18px 60px; }
+    .topbar{ padding:14px 18px; }
   }
 </style>
 </head>
 <body>
-<div class="page">
+<div class="app-shell">
 
-  <header class="masthead">
-    <p class="eyebrow">Review Intelligence · Weekly Crawl Summary</p>
-    <h1>주간 리뷰 분석 리포트</h1>
-    <div class="meta">
-      <span>생성일 <b>2026-07-22</b></span>
-      <span>수집 스토어 <b>Google Play (KR / ko)</b></span>
-      <span>대상 <b>랭플릭스</b> · 스픽 · 듀오링고</span>
-      <span>수집 방식 <b>google-play-scraper, 최신순</b></span>
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="mark">RF</div>
+      <div class="txt">
+        <div class="name">랭플릭스 리뷰 리포트</div>
+        <div class="sub">Review Intelligence</div>
+      </div>
     </div>
-  </header>
 
-  <section class="summary">
-    <h2 class="section-title">한눈에 보기</h2>
-    <p class="section-sub">각 앱의 구글플레이 한국어 리뷰를 최신순으로 수집한 결과입니다. 불만율은 별점 3점 이하 리뷰 비중입니다.</p>
-    <div class="stat-grid">
+    <nav class="nav" id="nav">
+      <div class="nav-label">Report</div>
+      <button data-target="overview" class="active">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="2" width="7" height="7" rx="1.5"/><rect x="11" y="2" width="7" height="7" rx="1.5"/><rect x="2" y="11" width="7" height="7" rx="1.5"/><rect x="11" y="11" width="7" height="7" rx="1.5"/></svg>
+        한눈에 보기
+      </button>
+      <button data-target="category">
+        <svg viewBox="0 0 20 20" fill="currentColor"><rect x="3" y="10" width="3" height="7" rx="1"/><rect x="8.5" y="5.5" width="3" height="11.5" rx="1"/><rect x="14" y="2.5" width="3" height="14.5" rx="1"/></svg>
+        카테고리 비교
+      </button>
+      <button data-target="rating">
+        <svg viewBox="0 0 20 20" fill="currentColor"><polygon points="10,2 12.0,7.25 17.61,7.53 13.23,11.05 14.70,16.47 10,13.4 5.30,16.47 6.77,11.05 2.39,7.53 8.00,7.25"/></svg>
+        별점 분포
+      </button>
+      <button data-target="competitor">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="7" cy="10" r="5.2"/><circle cx="13" cy="10" r="5.2"/></svg>
+        경쟁 앱 리뷰
+      </button>
+      <button data-target="own">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M4,2.5 L4,17.5 M4,3 L15.5,3 L12.3,7 L15.5,11 L4,11"/></svg>
+        자사 리뷰 분석
+      </button>
+    </nav>
+
+    <div class="sidebar-foot">
+      Google Play · KR/ko<br>생성일 2026-07-22
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <h1 id="topbarTitle">한눈에 보기</h1>
+      <div class="pills">
+        <span class="pill">생성일 2026-07-22</span>
+        <span class="pill">Google Play (KR/ko)</span>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <section class="panel active" id="panel-overview">
+        <div class="summary-card">
+<p>이번 리포트는 구글플레이 최신 리뷰를 기준으로 랭플릭스와 경쟁 앱(스픽, 듀오링고)의 리뷰 동향을 정리한 것입니다.</p>
+<p>랭플릭스는 평균 별점 <b>4.01</b>점, 불만율 <b>31.1%</b>이며, 가장 많이 제기된 불만은 '가격/구독'(42.9%)입니다.</p>
+<p>듀오링고은 평균 4.29점, 불만율 18.0%이며 최다 불만 카테고리는 '버그/오류'(22.9%)입니다. 스픽은 평균 4.43점, 불만율 14.8%이며 최다 불만 카테고리는 '가격/구독'(27.1%)입니다.</p>
+          <div class="note">수집 기준은 앱별 최신 리뷰 최대 800건입니다(랭플릭스는 리뷰 수가 적어 전체 90건을 모두 포함). 리뷰가 자주 달리는 앱일수록 800건이 더 짧은 기간에 몰려 있어 앱마다 실제 수집 기간이 다릅니다 — 듀오링고 2026-06-23 ~ 2026-07-20 (800건) · 스픽 2026-03-11 ~ 2026-07-21 (800건) · 랭플릭스 2025-05-20 ~ 2026-07-19 (90건).</div>
+        </div>
+
+        <h2 class="section-title">앱별 핵심 지표</h2>
+        <div class="section-sub"><p>각 앱의 구글플레이 한국어 리뷰를 최신순으로 수집한 결과입니다.</p><p>불만율은 별점 3점 이하 리뷰의 비중입니다.</p></div>
+        <div class="stat-grid">
 
       <div class="stat-card" style="--app-color:var(--duo)">
         <div class="app-name"><span class="dot"></span>듀오링고</div>
         <div class="hero">4.29<small>/5</small></div>
         <div class="rows">
-          <div class="row"><span>수집 리뷰</span><b>800건</b></div>
-          <div class="row"><span>불만율(★≤3)</span><span class="pill warning">18.0%</span></div>
-          <div class="row"><span>수집 기간</span><span>2026-06-23 ~ 2026-07-20</span></div>
+          <div class="row"><span class="lbl"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 4.5h14v9H7.5L4 16.5V13.5H3z" stroke-linejoin="round"/></svg><span>수집 리뷰</span></span><b>800건</b></div>
+          <div class="row"><span class="lbl"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M10 3 L18 17 H2 Z"/><line x1="10" y1="8" x2="10" y2="11.5"/><circle cx="10" cy="14" r="0.9" fill="currentColor" stroke="none"/></svg><span>불만율(★≤3)</span></span><span class="pill warning">18.0%</span></div>
+          <div class="row"><span class="lbl"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="14" height="13" rx="1.5"/><line x1="3" y1="8" x2="17" y2="8"/><line x1="7" y1="2.5" x2="7" y2="5.5"/><line x1="13" y1="2.5" x2="13" y2="5.5"/></svg><span>수집 기간</span></span><span>2026-06-23 ~ 2026-07-20</span></div>
         </div>
       </div>
 
@@ -247,9 +290,9 @@
         <div class="app-name"><span class="dot"></span>스픽</div>
         <div class="hero">4.43<small>/5</small></div>
         <div class="rows">
-          <div class="row"><span>수집 리뷰</span><b>800건</b></div>
-          <div class="row"><span>불만율(★≤3)</span><span class="pill good">14.8%</span></div>
-          <div class="row"><span>수집 기간</span><span>2026-03-11 ~ 2026-07-21</span></div>
+          <div class="row"><span class="lbl"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 4.5h14v9H7.5L4 16.5V13.5H3z" stroke-linejoin="round"/></svg><span>수집 리뷰</span></span><b>800건</b></div>
+          <div class="row"><span class="lbl"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M10 3 L18 17 H2 Z"/><line x1="10" y1="8" x2="10" y2="11.5"/><circle cx="10" cy="14" r="0.9" fill="currentColor" stroke="none"/></svg><span>불만율(★≤3)</span></span><span class="pill good">14.8%</span></div>
+          <div class="row"><span class="lbl"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="14" height="13" rx="1.5"/><line x1="3" y1="8" x2="17" y2="8"/><line x1="7" y1="2.5" x2="7" y2="5.5"/><line x1="13" y1="2.5" x2="13" y2="5.5"/></svg><span>수집 기간</span></span><span>2026-03-11 ~ 2026-07-21</span></div>
         </div>
       </div>
 
@@ -257,45 +300,49 @@
         <div class="app-name"><span class="dot"></span>랭플릭스 (자사)</div>
         <div class="hero">4.01<small>/5</small></div>
         <div class="rows">
-          <div class="row"><span>수집 리뷰</span><b>90건</b></div>
-          <div class="row"><span>불만율(★≤3)</span><span class="pill critical">31.1%</span></div>
-          <div class="row"><span>수집 기간</span><span>2025-05-20 ~ 2026-07-19</span></div>
+          <div class="row"><span class="lbl"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 4.5h14v9H7.5L4 16.5V13.5H3z" stroke-linejoin="round"/></svg><span>수집 리뷰</span></span><b>90건</b></div>
+          <div class="row"><span class="lbl"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M10 3 L18 17 H2 Z"/><line x1="10" y1="8" x2="10" y2="11.5"/><circle cx="10" cy="14" r="0.9" fill="currentColor" stroke="none"/></svg><span>불만율(★≤3)</span></span><span class="pill critical">31.1%</span></div>
+          <div class="row"><span class="lbl"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="14" height="13" rx="1.5"/><line x1="3" y1="8" x2="17" y2="8"/><line x1="7" y1="2.5" x2="7" y2="5.5"/><line x1="13" y1="2.5" x2="13" y2="5.5"/></svg><span>수집 기간</span></span><span>2025-05-20 ~ 2026-07-19</span></div>
         </div>
       </div>
-    </div>
-  </section>
+        </div>
+      </section>
 
-  <section class="chart-section">
-    <h2 class="section-title">불만 카테고리 비교</h2>
-    <p class="section-sub">불만 리뷰(★3 이하) 중 각 카테고리 키워드가 언급된 비율입니다. 한 리뷰가 여러 카테고리에 동시에 잡힐 수 있어 앱별 합계는 100%가 아닙니다.</p>
-    <div class="legend">
-      <div class="item"><span class="swatch" style="background:var(--duo)"></span>듀오링고</div>
-      <div class="item"><span class="swatch" style="background:var(--speak)"></span>스픽</div>
-      <div class="item"><span class="swatch" style="background:var(--lang)"></span>랭플릭스</div>
-    </div>
-    <div class="cat-chart" id="catChart"></div>
-  </section>
+      <section class="panel" id="panel-category">
+        <h2 class="section-title">불만 카테고리 비교</h2>
+        <div class="section-sub"><p>불만 리뷰(★3 이하) 중 각 카테고리 키워드가 언급된 비율입니다.</p><p>한 리뷰가 여러 카테고리에 동시에 잡힐 수 있어 앱별 합계는 100%가 아닙니다.</p></div>
+        <div class="chart-card">
+          <div class="legend">
+            <div class="item"><span class="swatch" style="background:var(--duo)"></span>듀오링고</div>
+            <div class="item"><span class="swatch" style="background:var(--speak)"></span>스픽</div>
+            <div class="item"><span class="swatch" style="background:var(--lang)"></span>랭플릭스</div>
+          </div>
+          <div class="cat-chart" id="catChart"></div>
+        </div>
+      </section>
 
-  <section class="chart-section">
-    <h2 class="section-title">별점 분포</h2>
-    <p class="section-sub">전체 수집 리뷰 기준 별점 비중입니다.</p>
-    <div class="legend">
-      <div class="item"><span class="swatch" style="background:var(--r1)"></span>1점</div>
-      <div class="item"><span class="swatch" style="background:var(--r2)"></span>2점</div>
-      <div class="item"><span class="swatch" style="background:var(--r3)"></span>3점</div>
-      <div class="item"><span class="swatch" style="background:var(--r4)"></span>4점</div>
-      <div class="item"><span class="swatch" style="background:var(--r5)"></span>5점</div>
-    </div>
-    <div class="rating-chart" id="ratingChart"></div>
-  </section>
+      <section class="panel" id="panel-rating">
+        <h2 class="section-title">별점 분포</h2>
+        <div class="section-sub"><p>전체 수집 리뷰 기준 별점 비중입니다.</p></div>
+        <div class="chart-card">
+          <div class="legend">
+            <div class="item"><span class="swatch" style="background:var(--r1)"></span>1점</div>
+            <div class="item"><span class="swatch" style="background:var(--r2)"></span>2점</div>
+            <div class="item"><span class="swatch" style="background:var(--r3)"></span>3점</div>
+            <div class="item"><span class="swatch" style="background:var(--r4)"></span>4점</div>
+            <div class="item"><span class="swatch" style="background:var(--r5)"></span>5점</div>
+          </div>
+          <div class="rating-chart" id="ratingChart"></div>
+        </div>
+      </section>
 
-  <section class="app-block">
-    <h2 class="section-title">경쟁 앱 리뷰 동향</h2>
-    <p class="section-sub">공감수(👍) 상위 불만 리뷰 기준으로 정리했습니다.</p>
+      <section class="panel" id="panel-competitor">
+        <h2 class="section-title">경쟁 앱 리뷰 동향</h2>
+        <div class="section-sub"><p>공감수(👍) 상위 불만 리뷰 기준으로 정리했습니다.</p></div>
 
-    <div class="app-sub">
-      <h3><span class="dot" style="background:var(--duo)"></span>듀오링고</h3>
-      <div class="chips">
+        <div class="app-sub">
+          <h3><span class="dot" style="background:var(--duo)"></span>듀오링고</h3>
+          <div class="chips">
         <span class="chip"><b>문제</b> 33</span>
         <span class="chip"><b>단어</b> 22</span>
         <span class="chip"><b>오류</b> 21</span>
@@ -304,8 +351,8 @@
         <span class="chip"><b>결제</b> 16</span>
         <span class="chip"><b>학습</b> 15</span>
         <span class="chip"><b>공부</b> 14</span>
-      </div>
-      <div class="quote-grid">
+          </div>
+          <div class="quote-grid">
         <div class="quote-card">
           <div class="qmeta"><span class="score">1점</span><span>2026-06-24</span><span>· 공감 9</span></div>
           <p>일년넘게 듀오 이용중입니다. 그런데 월드컵 수트 이벤트 왜안되요 ㅜㅠ 누군 되고 누군 안되는 그런 이벤튼가요 ㅜㅠ 지워도보고 업데이트가 있나 확인도해밨지만 안되요 ㅜㅠ 체스 처음 나올때도 늦게 적용되더니 이번엔 이벤트가 아예안대여 ㅜ</p>
@@ -321,12 +368,12 @@
           <p>꾸준히 하고 있는대 자주 등장하는 이상한 문제나 정답들 문의해도 바뀐적이 없이 매번 똑같은 오류로 나오고, 공부 도중 에너지 있는대도 충전 또는 구독 안하면 경험치 포기뿐이고 어차피 사람들이 이용하니까 무시하는 느낌이 드네요.</p>
           <div class="tags"><span class="tag">가격/구독</span><span class="tag">버그/오류</span><span class="tag">스트릭/동기부여</span><span class="tag">고객지원</span></div>
         </div>
-      </div>
-    </div>
+          </div>
+        </div>
 
-    <div class="app-sub">
-      <h3><span class="dot" style="background:var(--speak)"></span>스픽</h3>
-      <div class="chips">
+        <div class="app-sub">
+          <h3><span class="dot" style="background:var(--speak)"></span>스픽</h3>
+          <div class="chips">
         <span class="chip"><b>인식</b> 34</span>
         <span class="chip"><b>환불</b> 30</span>
         <span class="chip"><b>결제</b> 28</span>
@@ -335,8 +382,8 @@
         <span class="chip"><b>음성</b> 17</span>
         <span class="chip"><b>대화</b> 15</span>
         <span class="chip"><b>문제</b> 12</span>
-      </div>
-      <div class="quote-grid">
+          </div>
+          <div class="quote-grid">
         <div class="quote-card">
           <div class="qmeta"><span class="score">1점</span><span>2026-03-13</span><span>· 공감 26</span></div>
           <p>다시 리뷰 할게요 특정 단어 하나만 못 알아듣는 게 아니라 랜덤으로 인식이 안 되는 거였네요 앞에선 잘 얘기한 단어를 뒤에서 다시 말할 땐 갑자기 인식이 안 됩니다. 이게 무료 앱이었으면 저도 그냥 넘어갔을 겁니다. 근데 아니잖아요. 저 스픽을 이제 일주일밖에 안 썼습니다. 스피킹 위주로 공부하는 앱이 음성인식에 문제가 있는 게 말이 된다고 생각합니까? 다른 후기들 보면 이미 작년부터…</p>
@@ -352,23 +399,23 @@
           <p>저는 1년 넘게 프리토킹을 사용했습니다. 스픽에서 프로그램 업그레이드를 하고 있는것 같은데 최근들어 일주일 전후 (26.3)에 답변을 할때 녹음버튼을 누르고 말을 하는것으로 바뀐것 같습니다. 문제점은 1. 길게 대답하면 반응없음 2. 길게 대답하면 완전히 다른 한 문장으로 대체 어떻게해야 이전처럼 사용할 수있나요? 빠른 대답 부탁드립니다. 1년치 재결제했는데 이렇게는 사용 불가할듯 합니다.</p>
           <div class="tags"><span class="tag">가격/구독</span><span class="tag">UX/사용성</span><span class="tag">고객지원</span></div>
         </div>
-      </div>
-    </div>
-  </section>
+          </div>
+        </div>
+      </section>
 
-  <section class="app-block">
-    <h2 class="section-title">자사 리뷰 분석 — 랭플릭스</h2>
+      <section class="panel" id="panel-own">
+        <h2 class="section-title">자사 리뷰 분석 — 랭플릭스</h2>
 
-    <div class="trend-wrap">
-      <p class="section-sub" style="margin-bottom:10px;">월별 불만 리뷰(★3 이하) 건수</p>
-      <svg viewBox="0 0 600 160" id="trendSvg">
-        <line x1="30" y1="130" x2="570" y2="130" stroke="var(--hairline)" stroke-width="1"/>
-        <path d="M30.0,130 L30.0,116.34 L84.0,116.34 L138.0,61.68 L192.0,102.67 L246.0,102.67 L300.0,116.34 L354.0,116.34 L408.0,89.01 L462.0,116.34 L516.0,34.35 L570.0,75.34 L570.0,130 Z" fill="var(--lang)" opacity="0.1"/>
-        <polyline points="30.0,116.34 84.0,116.34 138.0,61.68 192.0,102.67 246.0,102.67 300.0,116.34 354.0,116.34 408.0,89.01 462.0,116.34 516.0,34.35 570.0,75.34" fill="none" stroke="var(--lang)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
-        <g id="trendDots"></g>
-        <text x="516.0" y="24.35" text-anchor="middle" font-size="12" font-weight="700" fill="var(--ink)">7건 (최고)</text>
+        <div class="chart-card trend-wrap">
+          <div class="section-sub" style="margin-bottom:10px;"><p>월별 불만 리뷰(★3 이하) 건수</p></div>
+          <svg viewBox="0 0 600 160" id="trendSvg">
+            <line x1="30" y1="130" x2="570" y2="130" stroke="var(--hairline)" stroke-width="1"/>
+            <path d="M30.0,130 L30.0,116.34 L84.0,116.34 L138.0,61.68 L192.0,102.67 L246.0,102.67 L300.0,116.34 L354.0,116.34 L408.0,89.01 L462.0,116.34 L516.0,34.35 L570.0,75.34 L570.0,130 Z" fill="var(--lang)" opacity="0.1"/>
+            <polyline points="30.0,116.34 84.0,116.34 138.0,61.68 192.0,102.67 246.0,102.67 300.0,116.34 354.0,116.34 408.0,89.01 462.0,116.34 516.0,34.35 570.0,75.34" fill="none" stroke="var(--lang)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+            <g id="trendDots"></g>
+            <text x="516.0" y="24.35" text-anchor="middle" font-size="12" font-weight="700" fill="var(--ink)">7건 (최고)</text>
         <text x="570.0" y="65.34" text-anchor="middle" font-size="11.5" font-weight="700" fill="var(--ink)">4건*</text>
-        <g font-size="9" fill="var(--muted)">
+            <g font-size="9" fill="var(--muted)">
           <text x="30.0" y="147" text-anchor="middle">25.05</text>
           <text x="84.0" y="147" text-anchor="middle">25.09</text>
           <text x="138.0" y="147" text-anchor="middle">25.11</text>
@@ -380,24 +427,24 @@
           <text x="462.0" y="147" text-anchor="middle">26.05</text>
           <text x="516.0" y="147" text-anchor="middle">26.06</text>
           <text x="570.0" y="147" text-anchor="middle">26.07</text>
-        </g>
-      </svg>
-      <p class="trend-note">* 2026-07은 2026-07-19까지 수집된 부분 데이터입니다.</p>
-    </div>
+            </g>
+          </svg>
+          <p class="trend-note">* 2026-07은 2026-07-19까지 수집된 부분 데이터입니다.</p>
 
-    <table class="version-table">
-      <thead><tr><th>버전</th><th>불만 리뷰 수</th></tr></thead>
-      <tbody>
+          <table class="version-table">
+            <thead><tr><th>버전</th><th>불만 리뷰 수</th></tr></thead>
+            <tbody>
         <tr><td>1.6.24</td><td>5건</td></tr>
         <tr><td>1.6.41</td><td>3건</td></tr>
         <tr><td>1.6.35</td><td>3건</td></tr>
         <tr><td>1.6.30</td><td>2건</td></tr>
         <tr><td>1.6.40</td><td>2건</td></tr>
-      </tbody>
-    </table>
+            </tbody>
+          </table>
+        </div>
 
-    <div class="app-sub">
-      <div class="chips">
+        <div class="app-sub" style="margin-top:24px;">
+          <div class="chips">
         <span class="chip"><b>오류</b> 16</span>
         <span class="chip"><b>업데이트</b> 13</span>
         <span class="chip"><b>학습</b> 12</span>
@@ -406,8 +453,8 @@
         <span class="chip"><b>유료</b> 10</span>
         <span class="chip"><b>기능</b> 9</span>
         <span class="chip"><b>반복</b> 7</span>
-      </div>
-      <div class="quote-grid">
+          </div>
+          <div class="quote-grid">
         <div class="quote-card">
           <div class="qmeta"><span class="score mid">3점</span><span>2025-11-30</span><span>· 공감 13</span></div>
           <p>매일 자기전 랭플릭스로 공부하고 자는게 낙이였는데 갑자기 거의 모든게 유료화 되어버렸네요... 기존 사용자들을 위해 유료구독 하지 않아도 기본 기능은 사용할 수 있었으면 좋았을 것 같은데 많이 아쉽습니다 거의 모든 기능이 유료결제 하지않으면 사용할 수 없게 되었네요 하루 복습만이라도 무료이용이 가능했다면 어땠을까하는 아쉬움이 남습니다</p>
@@ -428,17 +475,12 @@
           <p>최근에 이 앱을 알게되어서 이주 안되게 사용하고 있었는데 갑작스러운 유료전환은 아쉬워요ㅠㅠ 공지라도 있었으면 좋았겠다는 생각이 드네요 .. 사실상 무료로는 아무기능도 사용하지 못하게 다 막혀버려서.. 타 어플에 비해 구독료도 저렴한 편이 아니라 아쉽게 느껴져요 중간중간 오류도 꽤 있어서(음성 안들림, 버튼 안눌림 등) 결제까지 해야될 지 더 고민되네요...</p>
           <div class="tags"><span class="tag">가격/구독</span><span class="tag">버그/오류</span><span class="tag">UX/사용성</span></div>
         </div>
-      </div>
+          </div>
+        </div>
+      </section>
+
     </div>
-  </section>
-
-  <footer>
-    <div>수집: Google Play 리뷰 · 언어 ko / 국가 kr · <code>google-play-scraper</code>, 최신순 정렬 기준</div>
-    <div>분석 대상: 듀오링고 800건 · 스픽 800건 · 랭플릭스 90건</div>
-    <div>수집 기간: 듀오링고 2026-06-23 ~ 2026-07-20 · 스픽 2026-03-11 ~ 2026-07-21 · 랭플릭스 2025-05-20 ~ 2026-07-19</div>
-    <div>카테고리 분류는 리뷰 원문 키워드 매칭 기반이며, 다중 카테고리에 동시에 해당될 수 있습니다.</div>
-  </footer>
-
+  </div>
 </div>
 
 <div id="tip"></div>
@@ -454,6 +496,25 @@
   }
   function hideTip(){ tip.classList.remove('show'); }
 
+  // ---- tab navigation ----
+  const navButtons = document.querySelectorAll('#nav button');
+  const panels = document.querySelectorAll('.panel');
+  const topbarTitle = document.getElementById('topbarTitle');
+  navButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      navButtons.forEach(b => b.classList.remove('active'));
+      panels.forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('panel-' + btn.dataset.target).classList.add('active');
+      topbarTitle.textContent = btn.textContent.trim();
+      history.replaceState(null, '', '#' + btn.dataset.target);
+    });
+  });
+  const initial = location.hash.replace('#','');
+  const initialBtn = initial && document.querySelector('[data-target="' + initial + '"]');
+  if (initialBtn) initialBtn.click();
+
+  // ---- category comparison chart ----
   const CAT_DATA = [["가격/구독", [10.4, 27.1, 42.9], [15, 32, 12]], ["버그/오류", [22.9, 5.1, 42.9], [33, 6, 12]], ["고객지원", [8.3, 20.3, 10.7], [12, 24, 3]], ["UX/사용성", [6.9, 9.3, 21.4], [10, 11, 6]], ["AI/튜터", [11.8, 16.9, 3.6], [17, 20, 1]], ["광고", [3.5, 7.6, 7.1], [5, 9, 2]], ["스트릭/동기부여", [12.5, 1.7, 3.6], [18, 2, 1]], ["학습효과", [0.7, 1.7, 0.0], [1, 2, 0]]];
   const APP_NAMES = ["듀오링고","스픽","랭플릭스"];
   const APP_VARS = ["--duo","--speak","--lang"];
@@ -495,6 +556,7 @@
     catChart.appendChild(row);
   });
 
+  // ---- rating distribution chart ----
   const RATING_DATA = [["듀오링고", "--duo", [10.2, 2.8, 5.0, 11.4, 70.6], [82, 22, 40, 91, 565]], ["스픽", "--speak", [9.0, 1.6, 4.1, 8.1, 77.1], [72, 13, 33, 65, 617]], ["랭플릭스", "--lang", [11.1, 8.9, 11.1, 5.6, 63.3], [10, 8, 10, 5, 57]]];
   const RATING_VARS = ["--r1","--r2","--r3","--r4","--r5"];
   const ratingChart = document.getElementById('ratingChart');
@@ -524,6 +586,7 @@
     ratingChart.appendChild(row);
   });
 
+  // ---- trend chart dots + tooltip ----
   const TREND = [["25.05", 1, 30.0, 116.34], ["25.09", 1, 84.0, 116.34], ["25.11", 5, 138.0, 61.68], ["25.12", 2, 192.0, 102.67], ["26.01", 2, 246.0, 102.67], ["26.02", 1, 300.0, 116.34], ["26.03", 1, 354.0, 116.34], ["26.04", 3, 408.0, 89.01], ["26.05", 1, 462.0, 116.34], ["26.06", 7, 516.0, 34.35], ["26.07", 4, 570.0, 75.34]];
   const ns = 'http://www.w3.org/2000/svg';
   const dotsG = document.getElementById('trendDots');
