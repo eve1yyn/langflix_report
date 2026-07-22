@@ -110,6 +110,12 @@
   .summary-card p{ font-size:14px; line-height:1.75; color:var(--ink); margin:0 0 10px; }
   .summary-card p:last-child{ margin-bottom:0; }
   .summary-card p b{ font-variant-numeric:tabular-nums; }
+  .hl{
+    font-weight:800; padding:1px 7px; border-radius:6px; font-variant-numeric:tabular-nums;
+  }
+  .hl.good{ background:rgba(12,163,12,0.13); color:var(--good); }
+  .hl.warning{ background:rgba(181,121,10,0.14); color:var(--warning); }
+  .hl.critical{ background:rgba(208,59,59,0.13); color:var(--critical); }
   .note{
     font-size:12px; color:var(--muted); line-height:1.6; margin-top:14px; padding-top:14px;
     border-top:1px dashed var(--hairline);
@@ -153,10 +159,6 @@
   .cat-axis-line span{
     position:absolute; top:0; transform:translateX(-50%); font-size:10.5px; color:var(--muted);
     font-variant-numeric:tabular-nums;
-  }
-  .cat-axis-line span::before{
-    content:""; position:absolute; left:50%; top:14px; width:1px; height:2000px; background:var(--hairline);
-    z-index:-1;
   }
   .cat-axis-val-spacer{ width:52px; flex:none; }
 
@@ -217,6 +219,7 @@
   .quote-card .score{ font-weight:800; font-size:11.5px; padding:1px 7px; border-radius:5px; background:rgba(208,59,59,0.12); color:var(--critical); }
   .quote-card .score.mid{ background:rgba(181,121,10,0.14); color:var(--warning); }
   .quote-card p{ font-size:13px; line-height:1.6; color:var(--ink); margin:0; max-width:38ch; }
+  .quote-card p mark{ background:var(--accent-wash); color:var(--accent-ink); border-radius:3px; padding:0 2px; font-weight:700; }
   .quote-card .tags{ display:flex; flex-wrap:wrap; gap:5px; margin-top:2px; }
   .quote-card .tag{ font-size:10.5px; color:var(--ink-2); background:var(--surface); border:1px solid var(--hairline); padding:1px 7px; border-radius:99px; }
 
@@ -228,33 +231,50 @@
   .version-table th{ color:var(--muted); font-weight:600; font-size:11.5px; }
   .version-table td:last-child, .version-table th:last-child{ text-align:right; font-variant-numeric:tabular-nums; }
 
-  /* new features tab */
-  .feature-meta{ font-size:13px; color:var(--ink-2); margin-bottom:6px; }
-  .feature-grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(280px,1fr)); gap:10px; margin-top:6px; }
-  .feature-card{ background:var(--page); border:1px solid var(--border); border-radius:10px; padding:12px 14px; }
-  .feature-card .qmeta{ display:flex; gap:8px; font-size:11px; color:var(--muted); margin-bottom:6px; }
-  .feature-card p{ font-size:12.5px; line-height:1.55; margin:0; color:var(--ink); }
-
   /* news / youtube tabs */
   .news-list{ display:flex; flex-direction:column; gap:10px; }
   .news-card, .yt-card{
-    display:block; background:var(--surface); border:1px solid var(--border); border-radius:12px; box-shadow:var(--shadow);
-    padding:14px 16px; text-decoration:none; transition:border-color .12s ease;
+    display:flex; align-items:center; gap:14px; background:var(--surface); border:1px solid var(--border);
+    border-radius:12px; box-shadow:var(--shadow); padding:12px 16px; text-decoration:none;
+    transition:border-color .12s ease;
   }
   .news-card:hover, .yt-card:hover{ border-color:var(--accent); }
+  .news-card .favicon{ width:20px; height:20px; border-radius:5px; flex:none; background:var(--page); }
+  .yt-card .thumb{
+    width:96px; height:54px; border-radius:8px; object-fit:cover; flex:none; background:var(--page);
+  }
+  .news-body, .yt-body{ min-width:0; }
   .news-title{ font-size:13.5px; font-weight:600; color:var(--ink); line-height:1.5; }
   .news-meta{ font-size:11.5px; color:var(--muted); margin-top:6px; font-variant-numeric:tabular-nums; }
+
+  .table-scroll{ overflow-x:auto; }
 
   @media (max-width: 880px){
     .app-shell{ flex-direction:column; }
     .sidebar{ position:relative; width:100%; height:auto; flex-direction:row; align-items:center; overflow-x:auto; padding:12px 14px; }
     .brand{ flex:none; }
-    .nav{ flex-direction:row; }
+    .nav{ flex-direction:row; flex:none; }
+    .nav button{ white-space:nowrap; }
     .nav-label{ display:none; }
     .sidebar-foot{ display:none; }
     .stat-grid{ grid-template-columns:1fr; }
     .content{ padding:22px 18px 60px; }
     .topbar{ padding:14px 18px; }
+    .topbar h1{ font-size:16.5px; }
+  }
+
+  @media (max-width: 560px){
+    .quote-grid{ grid-template-columns:1fr; }
+    .quote-card p{ max-width:none; }
+    .cat-bar-track{ gap:6px; }
+    .bar-val{ width:40px; font-size:10.5px; }
+    .rating-row .label{ width:56px; font-size:12px; }
+    .yt-card .thumb{ width:72px; height:42px; }
+    .news-card, .yt-card{ padding:10px 12px; gap:10px; }
+    .news-title{ font-size:12.5px; }
+    .content{ padding:16px 14px 48px; }
+    .summary-card{ padding:16px 16px; }
+    .chart-card{ padding:16px 16px; }
   }
 </style>
 </head>
@@ -399,12 +419,14 @@ __TREND_LABELS_SVG__
             </svg>
             <p class="trend-note">__TREND_NOTE__</p>
 
-            <table class="version-table">
-              <thead><tr><th>버전</th><th>불만 리뷰 수</th></tr></thead>
-              <tbody>
+            <div class="table-scroll">
+              <table class="version-table">
+                <thead><tr><th>버전</th><th>불만 리뷰 수</th></tr></thead>
+                <tbody>
 __VERSION_ROWS__
-              </tbody>
-            </table>
+                </tbody>
+              </table>
+            </div>
           </div>
 
           <div class="app-sub" style="margin-top:24px;">
@@ -420,8 +442,10 @@ __LANG_CHIPS__
       <!-- ============ 신규 기능 동향 ============ -->
       <section class="panel" id="panel-features">
         <h2 class="section-title">신규 기능/업데이트 동향</h2>
-        <div class="section-sub"><p>구글플레이가 "새 소식(변경사항)" 텍스트를 더 이상 공개하지 않아, 공식 릴리즈 노트 대신 스토어의 최신 업데이트 날짜·버전과 리뷰에 포착된 변경사항 언급으로 구성했습니다.</p></div>
+        <div class="section-sub"><p>구글플레이가 "새 소식(변경사항)" 텍스트를 더 이상 공개하지 않아 공식 릴리즈 노트는 제공하지 않습니다.</p><p>대신 스토어에 표시되는 최신 업데이트 날짜와 현재 버전만 사실 그대로 보여줍니다.</p></div>
+        <div class="stat-grid">
 __NEW_FEATURES_HTML__
+        </div>
       </section>
 
       <!-- ============ 업계 뉴스 ============ -->
@@ -605,7 +629,22 @@ __YOUTUBE_HTML__
     return (lastSpace > 0 ? cut.slice(0, lastSpace) : cut) + '…';
   }
 
-  function renderQuoteCards(container, list){
+  function appendHighlighted(p, text, keyword){
+    if (!keyword) { p.textContent = text; return; }
+    const lower = text.toLowerCase();
+    const kw = keyword.toLowerCase();
+    let i = 0, idx;
+    while ((idx = lower.indexOf(kw, i)) !== -1) {
+      if (idx > i) p.appendChild(document.createTextNode(text.slice(i, idx)));
+      const mark = document.createElement('mark');
+      mark.textContent = text.slice(idx, idx + keyword.length);
+      p.appendChild(mark);
+      i = idx + keyword.length;
+    }
+    if (i < text.length) p.appendChild(document.createTextNode(text.slice(i)));
+  }
+
+  function renderQuoteCards(container, list, keyword){
     container.innerHTML = '';
     list.forEach(q => {
       const card = document.createElement('div');
@@ -626,7 +665,7 @@ __YOUTUBE_HTML__
       card.appendChild(meta);
 
       const p = document.createElement('p');
-      p.textContent = truncateText(q.review_text, 220);
+      appendHighlighted(p, truncateText(q.review_text, 220), keyword);
       card.appendChild(p);
 
       if (q.matched_categories && q.matched_categories !== '-') {
@@ -660,7 +699,7 @@ __YOUTUBE_HTML__
 
     function showFiltered(keyword, chipEl){
       const matches = cfg.complaints.filter(q => q.review_text.includes(keyword));
-      renderQuoteCards(grid, matches.slice(0, 12));
+      renderQuoteCards(grid, matches.slice(0, 12), keyword);
       chipsWrap.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
       chipEl.classList.add('active');
       const more = matches.length > 12 ? ' (상위 12건만 표시)' : '';

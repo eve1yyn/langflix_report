@@ -56,6 +56,7 @@ def search_videos(query: str, published_after: str):
             "title": it["snippet"]["title"],
             "channel": it["snippet"]["channelTitle"],
             "published_at": it["snippet"]["publishedAt"],
+            "thumbnail": it["snippet"]["thumbnails"].get("medium", it["snippet"]["thumbnails"]["default"])["url"],
             "query": query,
         }
         for it in data.get("items", [])
@@ -130,6 +131,7 @@ def main():
             "likes": v["likes"],
             "published_at": v["published_at"][:10],
             "url": f"https://www.youtube.com/watch?v={v['video_id']}",
+            "thumbnail": v["thumbnail"],
         }
         for v in all_videos
     ]

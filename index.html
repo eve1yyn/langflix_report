@@ -110,6 +110,12 @@
   .summary-card p{ font-size:14px; line-height:1.75; color:var(--ink); margin:0 0 10px; }
   .summary-card p:last-child{ margin-bottom:0; }
   .summary-card p b{ font-variant-numeric:tabular-nums; }
+  .hl{
+    font-weight:800; padding:1px 7px; border-radius:6px; font-variant-numeric:tabular-nums;
+  }
+  .hl.good{ background:rgba(12,163,12,0.13); color:var(--good); }
+  .hl.warning{ background:rgba(181,121,10,0.14); color:var(--warning); }
+  .hl.critical{ background:rgba(208,59,59,0.13); color:var(--critical); }
   .note{
     font-size:12px; color:var(--muted); line-height:1.6; margin-top:14px; padding-top:14px;
     border-top:1px dashed var(--hairline);
@@ -153,10 +159,6 @@
   .cat-axis-line span{
     position:absolute; top:0; transform:translateX(-50%); font-size:10.5px; color:var(--muted);
     font-variant-numeric:tabular-nums;
-  }
-  .cat-axis-line span::before{
-    content:""; position:absolute; left:50%; top:14px; width:1px; height:2000px; background:var(--hairline);
-    z-index:-1;
   }
   .cat-axis-val-spacer{ width:52px; flex:none; }
 
@@ -217,6 +219,7 @@
   .quote-card .score{ font-weight:800; font-size:11.5px; padding:1px 7px; border-radius:5px; background:rgba(208,59,59,0.12); color:var(--critical); }
   .quote-card .score.mid{ background:rgba(181,121,10,0.14); color:var(--warning); }
   .quote-card p{ font-size:13px; line-height:1.6; color:var(--ink); margin:0; max-width:38ch; }
+  .quote-card p mark{ background:var(--accent-wash); color:var(--accent-ink); border-radius:3px; padding:0 2px; font-weight:700; }
   .quote-card .tags{ display:flex; flex-wrap:wrap; gap:5px; margin-top:2px; }
   .quote-card .tag{ font-size:10.5px; color:var(--ink-2); background:var(--surface); border:1px solid var(--hairline); padding:1px 7px; border-radius:99px; }
 
@@ -228,33 +231,50 @@
   .version-table th{ color:var(--muted); font-weight:600; font-size:11.5px; }
   .version-table td:last-child, .version-table th:last-child{ text-align:right; font-variant-numeric:tabular-nums; }
 
-  /* new features tab */
-  .feature-meta{ font-size:13px; color:var(--ink-2); margin-bottom:6px; }
-  .feature-grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(280px,1fr)); gap:10px; margin-top:6px; }
-  .feature-card{ background:var(--page); border:1px solid var(--border); border-radius:10px; padding:12px 14px; }
-  .feature-card .qmeta{ display:flex; gap:8px; font-size:11px; color:var(--muted); margin-bottom:6px; }
-  .feature-card p{ font-size:12.5px; line-height:1.55; margin:0; color:var(--ink); }
-
   /* news / youtube tabs */
   .news-list{ display:flex; flex-direction:column; gap:10px; }
   .news-card, .yt-card{
-    display:block; background:var(--surface); border:1px solid var(--border); border-radius:12px; box-shadow:var(--shadow);
-    padding:14px 16px; text-decoration:none; transition:border-color .12s ease;
+    display:flex; align-items:center; gap:14px; background:var(--surface); border:1px solid var(--border);
+    border-radius:12px; box-shadow:var(--shadow); padding:12px 16px; text-decoration:none;
+    transition:border-color .12s ease;
   }
   .news-card:hover, .yt-card:hover{ border-color:var(--accent); }
+  .news-card .favicon{ width:20px; height:20px; border-radius:5px; flex:none; background:var(--page); }
+  .yt-card .thumb{
+    width:96px; height:54px; border-radius:8px; object-fit:cover; flex:none; background:var(--page);
+  }
+  .news-body, .yt-body{ min-width:0; }
   .news-title{ font-size:13.5px; font-weight:600; color:var(--ink); line-height:1.5; }
   .news-meta{ font-size:11.5px; color:var(--muted); margin-top:6px; font-variant-numeric:tabular-nums; }
+
+  .table-scroll{ overflow-x:auto; }
 
   @media (max-width: 880px){
     .app-shell{ flex-direction:column; }
     .sidebar{ position:relative; width:100%; height:auto; flex-direction:row; align-items:center; overflow-x:auto; padding:12px 14px; }
     .brand{ flex:none; }
-    .nav{ flex-direction:row; }
+    .nav{ flex-direction:row; flex:none; }
+    .nav button{ white-space:nowrap; }
     .nav-label{ display:none; }
     .sidebar-foot{ display:none; }
     .stat-grid{ grid-template-columns:1fr; }
     .content{ padding:22px 18px 60px; }
     .topbar{ padding:14px 18px; }
+    .topbar h1{ font-size:16.5px; }
+  }
+
+  @media (max-width: 560px){
+    .quote-grid{ grid-template-columns:1fr; }
+    .quote-card p{ max-width:none; }
+    .cat-bar-track{ gap:6px; }
+    .bar-val{ width:40px; font-size:10.5px; }
+    .rating-row .label{ width:56px; font-size:12px; }
+    .yt-card .thumb{ width:72px; height:42px; }
+    .news-card, .yt-card{ padding:10px 12px; gap:10px; }
+    .news-title{ font-size:12.5px; }
+    .content{ padding:16px 14px 48px; }
+    .summary-card{ padding:16px 16px; }
+    .chart-card{ padding:16px 16px; }
   }
 </style>
 </head>
@@ -314,9 +334,9 @@
       <section class="panel active" id="panel-overview">
         <div class="summary-card">
 <p>이번 리포트는 구글플레이 최신 리뷰를 기준으로 랭플릭스와 경쟁 앱(스픽, 듀오링고)의 리뷰 동향을 정리한 것입니다.</p>
-<p>랭플릭스는 평균 별점 <b>4.01</b>점, 불만율 <b>31.1%</b>이며, 가장 많이 제기된 불만은 '가격/구독'(42.9%)입니다.</p>
-<p>듀오링고은 평균 4.29점, 불만율 18.0%이며 최다 불만 카테고리는 '버그/오류'(22.9%)입니다.</p>
-<p>스픽은 평균 4.43점, 불만율 14.8%이며 최다 불만 카테고리는 '가격/구독'(27.1%)입니다.</p>
+<p>랭플릭스는 평균 별점 <b>4.01점</b>, 불만율 <span class="hl critical">31.1%</span>이며, 가장 많이 제기된 불만은 <b>'가격/구독'(42.9%)</b>입니다.</p>
+<p>듀오링고은 평균 <b>4.29점</b>, 불만율 <span class="hl warning">18.0%</span>이며 최다 불만 카테고리는 <b>'버그/오류'(22.9%)</b>입니다.</p>
+<p>스픽은 평균 <b>4.43점</b>, 불만율 <span class="hl good">14.8%</span>이며 최다 불만 카테고리는 <b>'가격/구독'(27.1%)</b>입니다.</p>
           <div class="note">수집 기준은 앱별 최신 리뷰 최대 800건입니다(랭플릭스는 리뷰 수가 적어 전체 90건을 모두 포함). 리뷰가 자주 달리는 앱일수록 800건이 더 짧은 기간에 몰려 있어 앱마다 실제 수집 기간이 다릅니다 — 듀오링고 2026-06-23 ~ 2026-07-20 (800건) · 스픽 2026-03-11 ~ 2026-07-21 (800건) · 랭플릭스 2025-05-20 ~ 2026-07-19 (90건).</div>
         </div>
 
@@ -456,16 +476,18 @@
             </svg>
             <p class="trend-note">* 2026-07은 2026-07-19까지 수집된 부분 데이터입니다.</p>
 
-            <table class="version-table">
-              <thead><tr><th>버전</th><th>불만 리뷰 수</th></tr></thead>
-              <tbody>
+            <div class="table-scroll">
+              <table class="version-table">
+                <thead><tr><th>버전</th><th>불만 리뷰 수</th></tr></thead>
+                <tbody>
         <tr><td>1.6.24</td><td>5건</td></tr>
         <tr><td>1.6.41</td><td>3건</td></tr>
         <tr><td>1.6.35</td><td>3건</td></tr>
         <tr><td>1.6.30</td><td>2건</td></tr>
         <tr><td>1.6.40</td><td>2건</td></tr>
-              </tbody>
-            </table>
+                </tbody>
+              </table>
+            </div>
           </div>
 
           <div class="app-sub" style="margin-top:24px;">
@@ -488,91 +510,33 @@
       <!-- ============ 신규 기능 동향 ============ -->
       <section class="panel" id="panel-features">
         <h2 class="section-title">신규 기능/업데이트 동향</h2>
-        <div class="section-sub"><p>구글플레이가 "새 소식(변경사항)" 텍스트를 더 이상 공개하지 않아, 공식 릴리즈 노트 대신 스토어의 최신 업데이트 날짜·버전과 리뷰에 포착된 변경사항 언급으로 구성했습니다.</p></div>
+        <div class="section-sub"><p>구글플레이가 "새 소식(변경사항)" 텍스트를 더 이상 공개하지 않아 공식 릴리즈 노트는 제공하지 않습니다.</p><p>대신 스토어에 표시되는 최신 업데이트 날짜와 현재 버전만 사실 그대로 보여줍니다.</p></div>
+        <div class="stat-grid">
 
-      <div class="app-sub">
-        <h3><span class="dot" style="background:var(--duo)"></span>듀오링고</h3>
-        <div class="feature-meta">최근 업데이트 <b>2026-07-21</b> · 버전 <b>Varies with device</b></div>
-        <div class="section-sub"><p>아래는 공식 릴리즈 노트가 아니라, 리뷰 원문에서 "업데이트/추가/이벤트" 등 변경 관련 표현이 포착된 리뷰입니다.</p></div>
-        <div class="feature-grid">
-          <div class="feature-card">
-            <div class="qmeta"><span>2026-07-07</span><span>· v6.86.5</span><span>· 공감 2</span></div>
-            <p>업데이트하니 일본어위에 영어가 너무거슬리고 오히려 일본어를 안보게되요ㅜ영어없애주세요</p>
-          </div>
-          <div class="feature-card">
-            <div class="qmeta"><span>2026-07-05</span><span>· v6.86.4</span><span>· 공감 22</span></div>
-            <p>※ 제발 저도 듀오 컵 이벤트 좀 바로 나오게 해주세요~ 제 느낌상 수트는 늦게 시작하면 늦은 만큼 더 오래 하는 것 같고 아예 안 나오면.... 어쩔수 없고요. 엉큼한 고양이 수트나 핫도그 수트 어디서 얻는지 궁금했는데 찾아보니 이미 기간도 지났더라고요! 왜 저는 안 뜨는건지 묻고싶고 일단 본론 들어가겠습니다. 이 앱의 장점은 매일 1일 1학습을 하게 만든다 / 여러 언어들이 있다. 이 앱의 단점은 매일 듀오가 집착한다 /…</p>
-          </div>
-          <div class="feature-card">
-            <div class="qmeta"><span>2026-07-05</span><span>· v6.86.4</span><span>· 공감 3</span></div>
-            <p>저는 듀오링고 1년차플레이어입니다. 듀오링고는정말 재밌는 앱으로인정해요! 다만 슈퍼 듀오링고를사지않으면 광고가 계속 뜨는면이 아쉽습니다. 그것말고 단점이 없어요. 제가 리뷰를 작성 할때부터 느꼈던 소감이 제가 하다보면 새로운단어도 익숙해지니까 쉽더라고요! 초보자도 쉽게 학습할수있습니다.😄</p>
-          </div>
-          <div class="feature-card">
-            <div class="qmeta"><span>2026-07-04</span><span>· v6.86.4</span><span>· 공감 1</span></div>
-            <p>듀오링고 일본어하고 있는데 처음엔 너무 재밌고 실력이 늘어나는 재미에 180일가량 빼먹지않고 했는데요. 유료사용중입니다. 요새 업데이트되면 몇가지 시스템에서 버그가 발생되서 화가납니다.!!!!! 우선 단어 발음이 정확하지 않아도 그냥 정답처리가 됩니다. 비슷하지 않아도 정답처리됨. 한국어로 답해도 정답임 그리고 오늘 화가난건 글을보고 단어를 순서대로 놓는거에서 단어가 6개라면 5개 올리고 마지막 단어 선택하면 단어가 선택되어…</p>
-          </div>
-          <div class="feature-card">
-            <div class="qmeta"><span>2026-07-04</span><span>· v6.86.4</span><span>· 공감 4</span></div>
-            <p>안녕하세요 듀오링고를무료로 50일은 간 유저입니다. 듀오링고가 장점도 있지만 단점도 있는데요. 장점은 무료로 배울수 있다는점, 재미있다는점 등등이 있는데요. 하지만 단점은, 알림이 너무 많이 온다는점, 앱아이콘이 너무 무섭다는점, 광고가 너무 많이 나온다는 점, 업데이트가 너무 자주된다는 점, 앱 아이템이 나오지 않는다는 점 등등이 있는데요.전 솔직히 비추? 까진 아니지만 깔아보시면 아실겁니다. 이러한 점 참고해서…</p>
-          </div>
+      <div class="stat-card" style="--app-color:var(--duo)">
+        <div class="app-name"><span class="dot"></span>듀오링고</div>
+        <div class="rows">
+          <div class="row"><span class="lbl"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="14" height="13" rx="1.5"/><line x1="3" y1="8" x2="17" y2="8"/><line x1="7" y1="2.5" x2="7" y2="5.5"/><line x1="13" y1="2.5" x2="13" y2="5.5"/></svg><span>최근 업데이트</span></span><b>2026-07-21</b></div>
+          <div class="row"><span class="lbl"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M10 3 L18 17 H2 Z"/><line x1="10" y1="8" x2="10" y2="11.5"/><circle cx="10" cy="14" r="0.9" fill="currentColor" stroke="none"/></svg><span>현재 버전</span></span><span>Varies with device</span></div>
         </div>
       </div>
 
-      <div class="app-sub">
-        <h3><span class="dot" style="background:var(--speak)"></span>스픽</h3>
-        <div class="feature-meta">최근 업데이트 <b>2026-07-15</b> · 버전 <b>4.57.0</b></div>
-        <div class="section-sub"><p>아래는 공식 릴리즈 노트가 아니라, 리뷰 원문에서 "업데이트/추가/이벤트" 등 변경 관련 표현이 포착된 리뷰입니다.</p></div>
-        <div class="feature-grid">
-          <div class="feature-card">
-            <div class="qmeta"><span>2026-07-12</span><span>· v4.55.0</span><span>· 공감 1</span></div>
-            <p>기초를 위한 패턴연습량은 무척 많음. 기능이 추가되어 모르는 부분 바로 묻기에 최적화됨. 간단한 회화 연습은 좋지만 심화는 안됨. 더 대화를 길게 하고 싶은데 그냥 끊어버림. 진짜 회화의 느낌은 아님. 초급에 매우 유용.</p>
-          </div>
-          <div class="feature-card">
-            <div class="qmeta"><span>2026-07-11</span><span>· v4.55.0</span><span>· 공감 1</span></div>
-            <p>이만한 앱 없긴 한데 스킬테스트 중 캐릭터의 음성은 나올때마다 깨지네요 한 번에 못 들어서 문제를 풀기 위해 손으로 다시 재생해야 하는 일이 빈번합니다. 심지어 앱을 한 번 나갔다 들어오면 그냥 재생이 안됩니다. 그냥 스킬테스트 자체가 버그 덩어리 입니다 방금은 음성 재생이 별 이유도 없이 두 번 됐어요. 프리미엄 플러스 이번에 사봤는데 3D 캐릭터가 나오는 건 솔직히 좀 거슬리네요 깔끔한게 더 좋은듯... 이게 업데이트…</p>
-          </div>
-          <div class="feature-card">
-            <div class="qmeta"><span>2026-07-02</span><span>· v4.54.0</span><span>· 공감 0</span></div>
-            <p>업데이트 이후 수업 진행시 버퍼링이 너무 잦아졌습니다.</p>
-          </div>
-          <div class="feature-card">
-            <div class="qmeta"><span>2026-07-01</span><span>· v4.54.0</span><span>· 공감 0</span></div>
-            <p>매일 새로운 학습 방법이 재미있고 한단계씩 넘어갈수록 내공이 쌓이는것 같아서 재미있는 공부를 하고있습니다</p>
-          </div>
-          <div class="feature-card">
-            <div class="qmeta"><span>2026-06-29</span><span>· v4.54.0</span><span>· 공감 0</span></div>
-            <p>free talk 에서 자꾸앱이 죽습니다. 업데이트이후에그런것같습니다.</p>
-          </div>
+      <div class="stat-card" style="--app-color:var(--speak)">
+        <div class="app-name"><span class="dot"></span>스픽</div>
+        <div class="rows">
+          <div class="row"><span class="lbl"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="14" height="13" rx="1.5"/><line x1="3" y1="8" x2="17" y2="8"/><line x1="7" y1="2.5" x2="7" y2="5.5"/><line x1="13" y1="2.5" x2="13" y2="5.5"/></svg><span>최근 업데이트</span></span><b>2026-07-15</b></div>
+          <div class="row"><span class="lbl"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M10 3 L18 17 H2 Z"/><line x1="10" y1="8" x2="10" y2="11.5"/><circle cx="10" cy="14" r="0.9" fill="currentColor" stroke="none"/></svg><span>현재 버전</span></span><span>4.57.0</span></div>
         </div>
       </div>
 
-      <div class="app-sub">
-        <h3><span class="dot" style="background:var(--lang)"></span>랭플릭스</h3>
-        <div class="feature-meta">최근 업데이트 <b>2026-07-16</b> · 버전 <b>1.6.43</b></div>
-        <div class="section-sub"><p>아래는 공식 릴리즈 노트가 아니라, 리뷰 원문에서 "업데이트/추가/이벤트" 등 변경 관련 표현이 포착된 리뷰입니다.</p></div>
-        <div class="feature-grid">
-          <div class="feature-card">
-            <div class="qmeta"><span>2026-06-18</span><span>· v1.6.41</span><span>· 공감 2</span></div>
-            <p>예전부터 문의도 몇 번 넣어봤는데 해결이 안되었습니다. 몇 개월 쓰면서 오류 나고 튕긴 적이 얼마나 많은지 모르겠어요. 앱 사용하며 지금도 충분히 불편하거나 부족하다 느껴지는 것 없이 랭플릭스만의 매력이 있다 생각했습니다. 계속 UI 바꾸고 업데이트하면서 오류나 로딩지연만 늘어나는 것 같아요.. 업데이트 필요없으니 오류 많은 것부터 고쳐주세요. 다른 후기들처럼 기껏 결제까지 해놓고 오류가 잦아 잘 안찾게 되네요</p>
-          </div>
-          <div class="feature-card">
-            <div class="qmeta"><span>2026-06-13</span><span>· v1.6.40</span><span>· 공감 1</span></div>
-            <p>앱에 자잘한 오류가 너무너무 많아서 불편해서ㅜ잘 안키게되요 어떻게든 흥미붙이려고 써보고 있는데 업데이트도 너무 잦고 업데이트 해도 오류가 자잘하게 너무 많습니다 1. 스크롤 할때 너무 버벅임(둘러보기 페이지) 2. shorts제한. 1200개 가까이 있다는데 둘어보기에서 쇼츠 부분 클릭후 이스트에 18개?정도 밖에 안뜸. 쇼츠도 개인적으로 분류가 있으면 좋겠음 3. 유투브자료로 학습 만들기 할때 자꾸 꼭한번 앱이 강제종료됨…</p>
-          </div>
-          <div class="feature-card">
-            <div class="qmeta"><span>2026-06-12</span><span>· v1.6.40</span><span>· 공감 0</span></div>
-            <p>영어를 매일 하는게 가장 어려운데, 매일 출석체크 이벤트로 반강제로 매일 들어오게되어서 가장 좋았어요 숏츠 보면서 영어공부하는게 그냥 유튜브 보는거같아서 친숙하고 재밌게 공부하게되네요</p>
-          </div>
-          <div class="feature-card">
-            <div class="qmeta"><span>2026-06-08</span><span>· v1.6.39</span><span>· 공감 1</span></div>
-            <p>체험해보고 좋은것같아서 1년 구독했는데요, 업데이트가 너무 잦고 로딩이 너무 오래걸려서 공부하려고 앱을 열었다가도 레슨하나못하고 앱을 닫게되는 일이 잦습니다. 유튜브 영상 검색했을때도 결과가 나오는 로딩 너무 오래걸리고 등등 영어공부를 하려다가도 안하게돼요! 이러면 어플이 무슨 의미인지 잘 모르겠어서 회의감이드네요. 공부 쉽게 자주 하는 김에 구독한건데. 개선부탁합니다. 이런 불안정한 어플.. 시기상조입니다</p>
-          </div>
-          <div class="feature-card">
-            <div class="qmeta"><span>2026-05-18</span><span>· v1.6.36</span><span>· 공감 1</span></div>
-            <p>태블릿으로밖에 공부를 못하는 상황인데, 갑자기 업데이트?되더니 넷플릭스 시청은 pc 확장 프로그램으로만 가능하다고 하면 어떡해요 ㅠㅠ 태블릿으로는 소리가 안 나와요..... 85000원이나 결제했는데... 이 문제 해결해주세요 태블릿 유저들이 엄청 많을텐데;;</p>
-          </div>
+      <div class="stat-card" style="--app-color:var(--lang)">
+        <div class="app-name"><span class="dot"></span>랭플릭스</div>
+        <div class="rows">
+          <div class="row"><span class="lbl"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="14" height="13" rx="1.5"/><line x1="3" y1="8" x2="17" y2="8"/><line x1="7" y1="2.5" x2="7" y2="5.5"/><line x1="13" y1="2.5" x2="13" y2="5.5"/></svg><span>최근 업데이트</span></span><b>2026-07-16</b></div>
+          <div class="row"><span class="lbl"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M10 3 L18 17 H2 Z"/><line x1="10" y1="8" x2="10" y2="11.5"/><circle cx="10" cy="14" r="0.9" fill="currentColor" stroke="none"/></svg><span>현재 버전</span></span><span>1.6.43</span></div>
         </div>
       </div>
+        </div>
       </section>
 
       <!-- ============ 업계 뉴스 ============ -->
@@ -581,52 +545,88 @@
         <div class="section-sub"><p>Google 뉴스에서 투자유치·정책 변화 등 관련 키워드로 검색한 최근 90일 이내 기사입니다.</p></div>
         <div class="news-list">
       <a class="news-card" href="https://news.google.com/rss/articles/CBMiTEFVX3lxTE8xeW5aWHBuMEVCYUgtX25oX2R3QUNvWU1FeC1ORExGRXRacEg4X3NMX0VRTDJTejlHcEh2dVVGVi1Ub1VYQXpiTlJXUVg?oc=5" target="_blank" rel="noopener noreferrer">
-        <div class="news-title">美 Accelerate, AI 에듀테크 스타트업에 최대 25만 달러 보조금 지원…증거 기반 검증이 관건</div>
-        <div class="news-meta">한국AI부동산신문 · 2026-07-21</div>
+        <img class="favicon" src="https://www.google.com/s2/favicons?domain=news.google.com&amp;sz=64" alt="" loading="lazy">
+        <div class="news-body">
+          <div class="news-title">美 Accelerate, AI 에듀테크 스타트업에 최대 25만 달러 보조금 지원…증거 기반 검증이 관건</div>
+          <div class="news-meta">한국AI부동산신문 · 2026-07-21</div>
+        </div>
       </a>
       <a class="news-card" href="https://news.google.com/rss/articles/CBMiUkFVX3lxTE4yRnNkNExhMmp1bEl4U293TkhWOFNwNjdBa1B1anlGNElwamx4amUzdjJpWmRxSngzWDBUYk1IUXNXNkFsWXN6TXlGOG9OZXNEWnc?oc=5" target="_blank" rel="noopener noreferrer">
-        <div class="news-title">&quot;영어는 AI 시키면 된다&quot;... 영어 수업, 영어 시험 없애는 중국 대학</div>
-        <div class="news-meta">JTBC · 2026-07-21</div>
+        <img class="favicon" src="https://www.google.com/s2/favicons?domain=news.google.com&amp;sz=64" alt="" loading="lazy">
+        <div class="news-body">
+          <div class="news-title">&quot;영어는 AI 시키면 된다&quot;... 영어 수업, 영어 시험 없애는 중국 대학</div>
+          <div class="news-meta">JTBC · 2026-07-21</div>
+        </div>
       </a>
       <a class="news-card" href="https://news.google.com/rss/articles/CBMiTEFVX3lxTE1CRVdiYW16SW5uT1NYY1VDNEFuRWF4QU8yVEd1TjJZdlZKdmZQUUdSY3ZueThCdXJ5N044cW9tV2ZWUlVIQTQxU1lMU04?oc=5" target="_blank" rel="noopener noreferrer">
-        <div class="news-title">[Pocus 심충 분석] 중국대학 영어과목폐지, AI실시간 통역이 부른 대반전</div>
-        <div class="news-meta">한국AI부동산신문 · 2026-07-20</div>
+        <img class="favicon" src="https://www.google.com/s2/favicons?domain=news.google.com&amp;sz=64" alt="" loading="lazy">
+        <div class="news-body">
+          <div class="news-title">[Pocus 심충 분석] 중국대학 영어과목폐지, AI실시간 통역이 부른 대반전</div>
+          <div class="news-meta">한국AI부동산신문 · 2026-07-20</div>
+        </div>
       </a>
       <a class="news-card" href="https://news.google.com/rss/articles/CBMiZEFVX3lxTE8xUGx6LUUwS1RMM3J0bzFrRE12NDNGTHFWT2c3LVQ2UlR3ZlUxdUJTYTk5UDVPRlE4ZmppZVk2OWEyLW55Z2t4R3VFbjlqYlc4eXBYRW1Zd2l3VjdPblMtOEozRTQ?oc=5" target="_blank" rel="noopener noreferrer">
-        <div class="news-title">&quot;대화하며 자연스럽게&quot;…AI 영어 학습 `스픽`, 여행 리허설 돕는다</div>
-        <div class="news-meta">디지털데일리 · 2026-07-20</div>
+        <img class="favicon" src="https://www.google.com/s2/favicons?domain=news.google.com&amp;sz=64" alt="" loading="lazy">
+        <div class="news-body">
+          <div class="news-title">&quot;대화하며 자연스럽게&quot;…AI 영어 학습 `스픽`, 여행 리허설 돕는다</div>
+          <div class="news-meta">디지털데일리 · 2026-07-20</div>
+        </div>
       </a>
       <a class="news-card" href="https://news.google.com/rss/articles/CBMiUkFVX3lxTE04ajd6Nlgyd1BkZlVNYndpOVgxRy04THJmNFJpUlhZdkxLOHFWVjY3ekxXRXUtRlFMWmpQSkdMUnZTM3YtV1prdUI2cXVrZ1g4SFE?oc=5" target="_blank" rel="noopener noreferrer">
-        <div class="news-title">듀오링고가 바꾼 것은 UX가 아니었습니다</div>
-        <div class="news-meta">브런치 · 2026-07-20</div>
+        <img class="favicon" src="https://www.google.com/s2/favicons?domain=news.google.com&amp;sz=64" alt="" loading="lazy">
+        <div class="news-body">
+          <div class="news-title">듀오링고가 바꾼 것은 UX가 아니었습니다</div>
+          <div class="news-meta">브런치 · 2026-07-20</div>
+        </div>
       </a>
       <a class="news-card" href="https://news.google.com/rss/articles/CBMidEFVX3lxTFAyc2lZb1V4UkFNZXJFd1lmME9MYzJJNXBSSk1TaUZvUmFRUHNYMkFKNko1czdBV2IyZDU1TmRvSmNQeFR1UXB2ZGRHUTRQY1N5aTUtQkpMdmc4allYQ1FBSE5fNHFBaGptRGxTZGlfSzVIdGlC?oc=5" target="_blank" rel="noopener noreferrer">
-        <div class="news-title">영어를 잘하려면 틀려야 한다?···스픽이 던진 역설</div>
-        <div class="news-meta">캠페인 인사이트 · 2026-07-19</div>
+        <img class="favicon" src="https://www.google.com/s2/favicons?domain=news.google.com&amp;sz=64" alt="" loading="lazy">
+        <div class="news-body">
+          <div class="news-title">영어를 잘하려면 틀려야 한다?···스픽이 던진 역설</div>
+          <div class="news-meta">캠페인 인사이트 · 2026-07-19</div>
+        </div>
       </a>
       <a class="news-card" href="https://news.google.com/rss/articles/CBMiU0FVX3lxTE1vZlJrdkg3ZS0xT3BkYXdKQXNPdGJDOG9vNXo2LXA5TWN6YVg3azdTU0F2cEdySS0telhlQk9wOXh5OHF5clBRa21OaVhoV2Nuc01V?oc=5" target="_blank" rel="noopener noreferrer">
-        <div class="news-title">&quot;영어는 AI가 다 하는데 왜 배우나&quot;…수업 없애겠다는 中 대학의 파격 실험</div>
-        <div class="news-meta">네이트 · 2026-07-19</div>
+        <img class="favicon" src="https://www.google.com/s2/favicons?domain=news.google.com&amp;sz=64" alt="" loading="lazy">
+        <div class="news-body">
+          <div class="news-title">&quot;영어는 AI가 다 하는데 왜 배우나&quot;…수업 없애겠다는 中 대학의 파격 실험</div>
+          <div class="news-meta">네이트 · 2026-07-19</div>
+        </div>
       </a>
       <a class="news-card" href="https://news.google.com/rss/articles/CBMijgFBVV95cUxPTk5HdFl1QW5Xam5QcWpUbkQzc2dSNmVFTzFnZ1FRZXRUdmplV0xHdlRpZzI5ZmhxcWhDMDNOaXJyOE5sOVBZcG1lMWpNUXJWaHFqUVJjX25hNTB3OG10UVNCMGhHLVptRGhYMHlzZ2JRNTlFMHBVYWRUcF90NHZ3M2JGQmVwM1pKc1NaZWJR?oc=5" target="_blank" rel="noopener noreferrer">
-        <div class="news-title">AI 선생님과 영어 공부… 교육 격차 줄여</div>
-        <div class="news-meta">조선일보 · 2026-07-19</div>
+        <img class="favicon" src="https://www.google.com/s2/favicons?domain=news.google.com&amp;sz=64" alt="" loading="lazy">
+        <div class="news-body">
+          <div class="news-title">AI 선생님과 영어 공부… 교육 격차 줄여</div>
+          <div class="news-meta">조선일보 · 2026-07-19</div>
+        </div>
       </a>
       <a class="news-card" href="https://news.google.com/rss/articles/CBMixgRBVV95cUxPeldiZXY0Wjl6WlEwc1VQaUJKb25SeEJuRkNEUEFyMzl2bnhiLWdGc3dxdGxPUENhY3VlWUxIUlRiT18wT3dMaFZKLWJ5dzN0S28wemhERG05WkhhT2dZeEowYTdIXzkwQ0QwMzRHTG9FSlBLYno3RXMzdnZkQkRydEJaTHFqaWdMeXVTaVFkSjlnc2hwSmpSeWVWR3laY2NOeDA3Mlp0UmJrenNsdWo1cXhYLUVoSjRCTmF5Tk1MemZKcDdxUUVIX2FVdDNHQ19DREsxZWRadEpNWkVXekRLTXJHNy1QdDVWaS1RVmIwQUVMbVZSVlctVjhEdWpLMmJKWWFrMUtycVJLZ1FsZXA3cEpuODdrWDIyU3N2OW1RT1EyY0VZQ0N5dWtZQ1RwV0VSSEJRQ1ZTM1dPZndkbUV3VWllQVZ1WEVxOTdJc2FiaV9hM2pZcU5RcU1UZDZ3bXJFSzN6cmFZcDg3Mm9YT3ppd2JucENYNVVrNnlpSzlzN0xqcFg4bHh5WGhBZkxNS0RVT3diU3Z5LVBJSER4bW5BTndvMHM0MXlzLW9DRFhYR2VJUzNpdEhNeG9ZOXZCTmdCTnJ6M2RIc3BSbURjUXVIUHNkZ2FmbHJPa2ZUdG5nXzRuVE9GSGhjWFAxeUxPMVFMejAxS09XanVkYjdmdE9mWDd6QVU5UkVTR19hSnJaWWFsbFVmTGRHck5NdFBnVVYwYnY3Z3liTjFqNThqU0hWSjJvUzhOY3UwYWEyMWNQcmNudk8xZEE?oc=5" target="_blank" rel="noopener noreferrer">
-        <div class="news-title">평택시국제교류재단, 'AI 영어 스마트 오피스' 운영…직장인 맞춤형 교육</div>
-        <div class="news-meta">MSN · 2026-07-18</div>
+        <img class="favicon" src="https://www.google.com/s2/favicons?domain=news.google.com&amp;sz=64" alt="" loading="lazy">
+        <div class="news-body">
+          <div class="news-title">평택시국제교류재단, 'AI 영어 스마트 오피스' 운영…직장인 맞춤형 교육</div>
+          <div class="news-meta">MSN · 2026-07-18</div>
+        </div>
       </a>
       <a class="news-card" href="https://news.google.com/rss/articles/CBMihwFBVV95cUxQRDJ2UWRITnlYWlpqN3JtSm1WY2JRcTNYMUFDMTYyNmlWOWREak9QYWN0NUJqSlNIWEo3Mi1sVVpwd3diZVBWYktOOGtuY0FBV0ktck83RkJ0ZHhNNElxUjZucDNFYnVkTThyb0NzNUVieDFYUW5DaGstUjRiMDdjMWh4ZjJoZ0k?oc=5" target="_blank" rel="noopener noreferrer">
-        <div class="news-title">Should You Buy Duolingo Stock After Its 77% Drawdown?</div>
-        <div class="news-meta">TIKR.com · 2026-07-18</div>
+        <img class="favicon" src="https://www.google.com/s2/favicons?domain=news.google.com&amp;sz=64" alt="" loading="lazy">
+        <div class="news-body">
+          <div class="news-title">Should You Buy Duolingo Stock After Its 77% Drawdown?</div>
+          <div class="news-meta">TIKR.com · 2026-07-18</div>
+        </div>
       </a>
       <a class="news-card" href="https://news.google.com/rss/articles/CBMidEFVX3lxTE9vY3hJUHpSdjBHQnd2M0lLby1GTndSTGJhWEMxVjJVeHR5dk1nYk9hTXUtaG1PQURwVEdkMEtwWEFsZHBNOEFNRVo0ZnRjeld0Y0toZVNxdFNIdXFMcURFSjFzY1phVzhLcktnWGtNY3JrS3RS?oc=5" target="_blank" rel="noopener noreferrer">
-        <div class="news-title">모건 스탠리, 듀오링고 목표주가 상향… 사용자 증가세 주목</div>
-        <div class="news-meta">Investing.com 한국어 · 2026-07-16</div>
+        <img class="favicon" src="https://www.google.com/s2/favicons?domain=news.google.com&amp;sz=64" alt="" loading="lazy">
+        <div class="news-body">
+          <div class="news-title">모건 스탠리, 듀오링고 목표주가 상향… 사용자 증가세 주목</div>
+          <div class="news-meta">Investing.com 한국어 · 2026-07-16</div>
+        </div>
       </a>
       <a class="news-card" href="https://news.google.com/rss/articles/CBMiWEFVX3lxTFBsdlNhX2dzRTNhZ1VnYkRFWHM0b2t1b2RTSUdSY21taFRRZkZfakYwOThaS3dZcEdHYlpVYk5wMWpoUV9YQUpHRnFPZnJlQ3dyNzl2d1Z4SDQ?oc=5" target="_blank" rel="noopener noreferrer">
-        <div class="news-title">서하초, AI펭톡 마일리지 이벤트 운영…영어 학습 흥미 높여</div>
-        <div class="news-meta">주간함양 · 2026-07-16</div>
+        <img class="favicon" src="https://www.google.com/s2/favicons?domain=news.google.com&amp;sz=64" alt="" loading="lazy">
+        <div class="news-body">
+          <div class="news-title">서하초, AI펭톡 마일리지 이벤트 운영…영어 학습 흥미 높여</div>
+          <div class="news-meta">주간함양 · 2026-07-16</div>
+        </div>
       </a>
         </div>
       </section>
@@ -637,52 +637,88 @@
         <div class="section-sub"><p>YouTube Data API로 최근 30일 내 영어학습 관련 화제 영상을 조회수 기준으로 모았습니다.</p></div>
         <div class="news-list">
       <a class="yt-card" href="https://www.youtube.com/watch?v=KNoJdDAvMpA" target="_blank" rel="noopener noreferrer">
-        <div class="news-title">sao con duolingo nó #viralvideo #xuhuong #edit  #funny</div>
-        <div class="news-meta">meluotthreads · 조회 3,480,043 · 좋아요 39,962 · 2026-07-11</div>
+        <img class="thumb" src="https://i.ytimg.com/vi/KNoJdDAvMpA/mqdefault.jpg" alt="" loading="lazy">
+        <div class="yt-body">
+          <div class="news-title">sao con duolingo nó #viralvideo #xuhuong #edit  #funny</div>
+          <div class="news-meta">meluotthreads · 조회 3,481,015 · 좋아요 39,978 · 2026-07-11</div>
+        </div>
       </a>
       <a class="yt-card" href="https://www.youtube.com/watch?v=GGxtvUVx0XY" target="_blank" rel="noopener noreferrer">
-        <div class="news-title">Airplane English Conversation | Useful Vocabulary &amp;amp; Phrases at the Airport #learnenglish #shorts</div>
-        <div class="news-meta">Aarvi Negi  · 조회 3,224,708 · 좋아요 34,188 · 2026-07-03</div>
+        <img class="thumb" src="https://i.ytimg.com/vi/GGxtvUVx0XY/mqdefault.jpg" alt="" loading="lazy">
+        <div class="yt-body">
+          <div class="news-title">Airplane English Conversation | Useful Vocabulary &amp;amp; Phrases at the Airport #learnenglish #shorts</div>
+          <div class="news-meta">Aarvi Negi  · 조회 3,225,639 · 좋아요 34,195 · 2026-07-03</div>
+        </div>
       </a>
       <a class="yt-card" href="https://www.youtube.com/watch?v=puadT9a6yi8" target="_blank" rel="noopener noreferrer">
-        <div class="news-title">영어천재 되는 법</div>
-        <div class="news-meta">민쩌미 · 조회 1,667,689 · 좋아요 19,802 · 2026-07-08</div>
-      </a>
-      <a class="yt-card" href="https://www.youtube.com/watch?v=yGVbiJ3m-_g" target="_blank" rel="noopener noreferrer">
-        <div class="news-title">Duolingoで日本語勉強するも、、# #vtuber #チビドキ</div>
-        <div class="news-meta">ワールドミント(。ω  °)        【チビドキ日本語】 · 조회 1,427,154 · 좋아요 43,996 · 2026-07-12</div>
+        <img class="thumb" src="https://i.ytimg.com/vi/puadT9a6yi8/mqdefault.jpg" alt="" loading="lazy">
+        <div class="yt-body">
+          <div class="news-title">영어천재 되는 법</div>
+          <div class="news-meta">민쩌미 · 조회 1,668,015 · 좋아요 19,806 · 2026-07-08</div>
+        </div>
       </a>
       <a class="yt-card" href="https://www.youtube.com/watch?v=6DGjmKoo4io" target="_blank" rel="noopener noreferrer">
-        <div class="news-title">Duolingo is losing his mind 😭😂</div>
-        <div class="news-meta">CobbleCat · 조회 1,371,163 · 좋아요 35,184 · 2026-06-25</div>
+        <img class="thumb" src="https://i.ytimg.com/vi/6DGjmKoo4io/mqdefault.jpg" alt="" loading="lazy">
+        <div class="yt-body">
+          <div class="news-title">Duolingo is losing his mind 😭😂</div>
+          <div class="news-meta">CobbleCat · 조회 1,371,197 · 좋아요 35,185 · 2026-06-25</div>
+        </div>
       </a>
       <a class="yt-card" href="https://www.youtube.com/watch?v=iGgrnfJdniU" target="_blank" rel="noopener noreferrer">
-        <div class="news-title">(🚨영어실수) 타일러도 영어를 안 쓰면 생기는 황당한 상황 #타일러볼까요 #타일러라쉬 #딘딘 #영어실수 #예능쇼츠</div>
-        <div class="news-meta">MOVIESTARWA · 조회 1,323,419 · 좋아요 11,361 · 2026-06-22</div>
+        <img class="thumb" src="https://i.ytimg.com/vi/iGgrnfJdniU/mqdefault.jpg" alt="" loading="lazy">
+        <div class="yt-body">
+          <div class="news-title">(🚨영어실수) 타일러도 영어를 안 쓰면 생기는 황당한 상황 #타일러볼까요 #타일러라쉬 #딘딘 #영어실수 #예능쇼츠</div>
+          <div class="news-meta">MOVIESTARWA · 조회 1,323,622 · 좋아요 11,370 · 2026-06-22</div>
+        </div>
+      </a>
+      <a class="yt-card" href="https://www.youtube.com/watch?v=aHc9tb2u1JI" target="_blank" rel="noopener noreferrer">
+        <img class="thumb" src="https://i.ytimg.com/vi/aHc9tb2u1JI/mqdefault.jpg" alt="" loading="lazy">
+        <div class="yt-body">
+          <div class="news-title">Quando você ignora o Duolingo por alguns dias...</div>
+          <div class="news-meta">stukis · 조회 1,181,505 · 좋아요 49,740 · 2026-07-10</div>
+        </div>
       </a>
       <a class="yt-card" href="https://www.youtube.com/watch?v=bjknIr81Xwg" target="_blank" rel="noopener noreferrer">
-        <div class="news-title">Duolingo Life Cycle 🦉</div>
-        <div class="news-meta">Logostern · 조회 781,919 · 좋아요 3,323 · 2026-06-27</div>
+        <img class="thumb" src="https://i.ytimg.com/vi/bjknIr81Xwg/mqdefault.jpg" alt="" loading="lazy">
+        <div class="yt-body">
+          <div class="news-title">Duolingo Life Cycle 🦉</div>
+          <div class="news-meta">Logostern · 조회 782,022 · 좋아요 3,323 · 2026-06-27</div>
+        </div>
       </a>
       <a class="yt-card" href="https://www.youtube.com/watch?v=7e7GCcRpOxY" target="_blank" rel="noopener noreferrer">
-        <div class="news-title">영어 능통 편집 할 줄 아는 최저시급 인력 #젠지 #lck #shorts</div>
-        <div class="news-meta">대유쾌마운틴 · 조회 507,218 · 좋아요 5,099 · 2026-06-23</div>
+        <img class="thumb" src="https://i.ytimg.com/vi/7e7GCcRpOxY/mqdefault.jpg" alt="" loading="lazy">
+        <div class="yt-body">
+          <div class="news-title">영어 능통 편집 할 줄 아는 최저시급 인력 #젠지 #lck #shorts</div>
+          <div class="news-meta">대유쾌마운틴 · 조회 507,218 · 좋아요 5,099 · 2026-06-23</div>
+        </div>
       </a>
       <a class="yt-card" href="https://www.youtube.com/watch?v=_-g35kAt9bU" target="_blank" rel="noopener noreferrer">
-        <div class="news-title">연매출 1500억 미국 뷰티 회사 CEO!! 미국에서 일잘러로 살아남은 영어공부 비법 | 전 넷플릭스, 메타, 틱톡 디렉터 돌싱글즈4 이소라님</div>
-        <div class="news-meta">캘리쌤 브이로그 영어 · 조회 254,825 · 좋아요 6,398 · 2026-07-07</div>
+        <img class="thumb" src="https://i.ytimg.com/vi/_-g35kAt9bU/mqdefault.jpg" alt="" loading="lazy">
+        <div class="yt-body">
+          <div class="news-title">연매출 1500억 미국 뷰티 회사 CEO!! 미국에서 일잘러로 살아남은 영어공부 비법 | 전 넷플릭스, 메타, 틱톡 디렉터 돌싱글즈4 이소라님</div>
+          <div class="news-meta">캘리쌤 브이로그 영어 · 조회 254,921 · 좋아요 6,399 · 2026-07-07</div>
+        </div>
       </a>
       <a class="yt-card" href="https://www.youtube.com/watch?v=GNTCqdpSni0" target="_blank" rel="noopener noreferrer">
-        <div class="news-title">초등 영어 어떻게 시작할까? 초등 엄마들의 리얼후기</div>
-        <div class="news-meta">아동 전문가들의 육아토크 아육톡 : · 조회 189,411 · 좋아요 6 · 2026-06-30</div>
+        <img class="thumb" src="https://i.ytimg.com/vi/GNTCqdpSni0/mqdefault.jpg" alt="" loading="lazy">
+        <div class="yt-body">
+          <div class="news-title">초등 영어 어떻게 시작할까? 초등 엄마들의 리얼후기</div>
+          <div class="news-meta">아동 전문가들의 육아토크 아육톡 : · 조회 189,516 · 좋아요 6 · 2026-06-30</div>
+        </div>
       </a>
       <a class="yt-card" href="https://www.youtube.com/watch?v=5H52E8ygl8o" target="_blank" rel="noopener noreferrer">
-        <div class="news-title">잘 자라고 한 것 뿐인데... #praktika #영어공부 #ai랑놀면서 #영어회화 #영어독학</div>
-        <div class="news-meta">praktikawith-ds · 조회 147,584 · 좋아요 528 · 2026-06-26</div>
+        <img class="thumb" src="https://i.ytimg.com/vi/5H52E8ygl8o/mqdefault.jpg" alt="" loading="lazy">
+        <div class="yt-body">
+          <div class="news-title">잘 자라고 한 것 뿐인데... #praktika #영어공부 #ai랑놀면서 #영어회화 #영어독학</div>
+          <div class="news-meta">praktikawith-ds · 조회 147,584 · 좋아요 528 · 2026-06-26</div>
+        </div>
       </a>
       <a class="yt-card" href="https://www.youtube.com/watch?v=hxAGRUWd5vs" target="_blank" rel="noopener noreferrer">
-        <div class="news-title">알파벳 E 안쓰고 말하기 어케하는건데 !! #praktika #영어공부 #ai랑놀면서 #영어회화 #영어독학</div>
-        <div class="news-meta">praktikawith-ds · 조회 103,887 · 좋아요 233 · 2026-06-23</div>
+        <img class="thumb" src="https://i.ytimg.com/vi/hxAGRUWd5vs/mqdefault.jpg" alt="" loading="lazy">
+        <div class="yt-body">
+          <div class="news-title">알파벳 E 안쓰고 말하기 어케하는건데 !! #praktika #영어공부 #ai랑놀면서 #영어회화 #영어독학</div>
+          <div class="news-meta">praktikawith-ds · 조회 103,887 · 좋아요 233 · 2026-06-23</div>
+        </div>
       </a>
         </div>
       </section>
@@ -850,7 +886,22 @@
     return (lastSpace > 0 ? cut.slice(0, lastSpace) : cut) + '…';
   }
 
-  function renderQuoteCards(container, list){
+  function appendHighlighted(p, text, keyword){
+    if (!keyword) { p.textContent = text; return; }
+    const lower = text.toLowerCase();
+    const kw = keyword.toLowerCase();
+    let i = 0, idx;
+    while ((idx = lower.indexOf(kw, i)) !== -1) {
+      if (idx > i) p.appendChild(document.createTextNode(text.slice(i, idx)));
+      const mark = document.createElement('mark');
+      mark.textContent = text.slice(idx, idx + keyword.length);
+      p.appendChild(mark);
+      i = idx + keyword.length;
+    }
+    if (i < text.length) p.appendChild(document.createTextNode(text.slice(i)));
+  }
+
+  function renderQuoteCards(container, list, keyword){
     container.innerHTML = '';
     list.forEach(q => {
       const card = document.createElement('div');
@@ -871,7 +922,7 @@
       card.appendChild(meta);
 
       const p = document.createElement('p');
-      p.textContent = truncateText(q.review_text, 220);
+      appendHighlighted(p, truncateText(q.review_text, 220), keyword);
       card.appendChild(p);
 
       if (q.matched_categories && q.matched_categories !== '-') {
@@ -905,7 +956,7 @@
 
     function showFiltered(keyword, chipEl){
       const matches = cfg.complaints.filter(q => q.review_text.includes(keyword));
-      renderQuoteCards(grid, matches.slice(0, 12));
+      renderQuoteCards(grid, matches.slice(0, 12), keyword);
       chipsWrap.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
       chipEl.classList.add('active');
       const more = matches.length > 12 ? ' (상위 12건만 표시)' : '';
