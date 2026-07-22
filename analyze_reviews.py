@@ -120,13 +120,27 @@ def analyze_app(app_key: str) -> dict:
         .head(8)[["review_text", "score", "date", "thumbs_up_count", "app_version"]]
     )
 
-    # 앱 버전별 불만 추이
+    # 앱 버전별 불만 추이 — 리뷰 수가 아니라 "그 버전 리뷰 중 불만 비율"로 비교해야
+    # 원래 리뷰가 많았던 버전과 적었던 버전을 공정하게 비교할 수 있다.
+    MIN_VERSION_SAMPLE = 5  # 표본이 너무 적으면 비율이 왜곡되므로 제외
+
+    version_total = df.groupby("app_version").size()
+    version_complaints = complaints.groupby("app_version").size()
+
     version_trend = (
-        complaints.groupby("app_version")
-        .size()
-        .sort_values(ascending=False)
+        pd.DataFrame({"total_count": version_total, "complaint_count": version_complaints})
+        .fillna(0)
+        .astype({"total_count": int, "complaint_count": int})
+    )
+    version_trend = version_trend[version_trend["total_count"] >= MIN_VERSION_SAMPLE]
+    version_trend["complaint_rate"] = (
+        version_trend["complaint_count"] / version_trend["total_count"] * 100
+    ).round(1)
+    version_trend = (
+        version_trend.sort_values("complaint_rate", ascending=False)
         .head(10)
-        .reset_index(name="complaint_count")
+        .reset_index()
+        .rename(columns={"index": "app_version"})
     )
 
     # 엑셀 저장

@@ -305,8 +305,12 @@ def build_period_note(summary):
 
 def build_version_table(app, n=5):
     rows = app["version_trend"][:n]
+    if not rows:
+        return '                <tr><td colspan="3" class="empty-note">표본이 충분한 버전이 없습니다.</td></tr>'
     return "\n".join(
-        f"        <tr><td>{escape_html(v['app_version'])}</td><td>{v['complaint_count']}건</td></tr>"
+        f"        <tr><td>{escape_html(v['app_version'])}</td>"
+        f"<td>{v['complaint_rate']}%</td>"
+        f"<td>{v['total_count']}건</td></tr>"
         for v in rows
     )
 
