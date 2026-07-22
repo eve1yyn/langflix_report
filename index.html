@@ -42,6 +42,7 @@
     -webkit-font-smoothing:antialiased;
   }
   :focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+  a{ color:inherit; }
 
   .app-shell{ display:flex; min-height:100vh; align-items:stretch; }
 
@@ -99,6 +100,7 @@
   .section-sub p{ font-size:13px; color:var(--muted); margin:0 0 4px; line-height:1.6; }
   .section-sub{ margin-bottom:18px; }
   section + section{ margin-top:38px; }
+  .block + .block{ margin-top:34px; }
 
   /* overview summary */
   .summary-card{
@@ -112,6 +114,7 @@
     font-size:12px; color:var(--muted); line-height:1.6; margin-top:14px; padding-top:14px;
     border-top:1px dashed var(--hairline);
   }
+  .empty-note{ font-size:13px; color:var(--muted); }
 
   /* stat cards */
   .stat-grid{ display:grid; grid-template-columns: repeat(3,1fr); gap:14px; }
@@ -140,11 +143,24 @@
     background:var(--surface); border:1px solid var(--border); border-radius:14px; box-shadow:var(--shadow);
     padding:20px 22px;
   }
+  .chart-caption{ font-size:12.5px; color:var(--muted); margin:0 0 16px; line-height:1.6; }
   .legend{ display:flex; flex-wrap:wrap; gap:16px; margin-bottom:16px; }
   .legend .item{ display:flex; align-items:center; gap:7px; font-size:12.5px; color:var(--ink-2); }
   .legend .swatch{ width:10px; height:10px; border-radius:2px; }
 
-  .cat-chart{ display:flex; flex-direction:column; gap:14px; }
+  .cat-axis{ display:flex; align-items:center; gap:10px; margin-bottom:8px; }
+  .cat-axis-line{ flex:1; position:relative; height:14px; }
+  .cat-axis-line span{
+    position:absolute; top:0; transform:translateX(-50%); font-size:10.5px; color:var(--muted);
+    font-variant-numeric:tabular-nums;
+  }
+  .cat-axis-line span::before{
+    content:""; position:absolute; left:50%; top:14px; width:1px; height:2000px; background:var(--hairline);
+    z-index:-1;
+  }
+  .cat-axis-val-spacer{ width:52px; flex:none; }
+
+  .cat-chart{ display:flex; flex-direction:column; gap:14px; position:relative; }
   .cat-row .cat-label{ font-size:13px; font-weight:600; margin-bottom:6px; }
   .cat-row .cat-bars{ display:flex; flex-direction:column; gap:4px; }
   .cat-bar-track{ display:flex; align-items:center; gap:10px; height:14px; }
@@ -156,9 +172,10 @@
   .rating-chart{ display:flex; flex-direction:column; gap:16px; }
   .rating-row{ display:flex; align-items:center; gap:14px; }
   .rating-row .label{ width:78px; flex:none; font-size:13px; font-weight:600; }
-  .rating-row .stack{ flex:1; display:flex; gap:2px; height:22px; border-radius:4px; overflow:hidden; background:var(--page); }
-  .rating-row .seg{ height:100%; }
+  .rating-row .stack{ flex:1; display:flex; gap:2px; height:26px; border-radius:4px; overflow:hidden; background:var(--page); }
+  .rating-row .seg{ height:100%; position:relative; display:flex; align-items:center; justify-content:center; }
   .rating-row .seg:hover, .rating-row .seg:focus-visible{ filter:brightness(1.1); outline:none; }
+  .rating-row .seg .seg-label{ font-size:10.5px; font-weight:700; font-variant-numeric:tabular-nums; }
 
   #tip{
     position:fixed; z-index:50; pointer-events:none; opacity:0; transform:translate(-50%,-100%);
@@ -172,12 +189,24 @@
   .app-sub + .app-sub{ margin-top:30px; }
   .app-sub h3{ font-size:15.5px; font-weight:700; margin:0 0 12px; display:flex; align-items:center; gap:8px; }
   .app-sub h3 .dot{ width:10px; height:10px; border-radius:3px; }
-  .chips{ display:flex; flex-wrap:wrap; gap:7px; margin-bottom:16px; }
+  .chips{ display:flex; flex-wrap:wrap; gap:7px; margin-bottom:10px; }
   .chip{
-    font-size:12px; color:var(--ink-2); background:var(--page); border:1px solid var(--border);
-    padding:4px 10px; border-radius:99px; font-variant-numeric:tabular-nums;
+    all:unset; cursor:pointer; font-size:12px; color:var(--ink-2); background:var(--page);
+    border:1px solid var(--border); padding:4px 10px; border-radius:99px; font-variant-numeric:tabular-nums;
   }
-  .chip b{ color:var(--ink); font-weight:700; }
+  .chip:hover{ border-color:var(--accent); }
+  .chip.active{ background:var(--accent-wash); border-color:var(--accent); color:var(--accent-ink); }
+  .chip b{ color:inherit; font-weight:700; }
+  .chip-hint{ font-size:11.5px; color:var(--muted); margin:0 0 12px; }
+
+  .filter-status{
+    display:none; align-items:center; gap:8px; font-size:12.5px; color:var(--ink-2);
+    background:var(--page); border:1px solid var(--border); border-radius:8px; padding:7px 12px; margin-bottom:12px;
+  }
+  .filter-status.show{ display:flex; }
+  .filter-status button{
+    all:unset; cursor:pointer; font-size:12px; font-weight:700; color:var(--accent-ink); margin-left:auto;
+  }
 
   .quote-grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(300px,1fr)); gap:12px; }
   .quote-card{
@@ -198,6 +227,23 @@
   .version-table th, .version-table td{ text-align:left; padding:7px 10px; border-bottom:1px solid var(--hairline); }
   .version-table th{ color:var(--muted); font-weight:600; font-size:11.5px; }
   .version-table td:last-child, .version-table th:last-child{ text-align:right; font-variant-numeric:tabular-nums; }
+
+  /* new features tab */
+  .feature-meta{ font-size:13px; color:var(--ink-2); margin-bottom:6px; }
+  .feature-grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(280px,1fr)); gap:10px; margin-top:6px; }
+  .feature-card{ background:var(--page); border:1px solid var(--border); border-radius:10px; padding:12px 14px; }
+  .feature-card .qmeta{ display:flex; gap:8px; font-size:11px; color:var(--muted); margin-bottom:6px; }
+  .feature-card p{ font-size:12.5px; line-height:1.55; margin:0; color:var(--ink); }
+
+  /* news / youtube tabs */
+  .news-list{ display:flex; flex-direction:column; gap:10px; }
+  .news-card, .yt-card{
+    display:block; background:var(--surface); border:1px solid var(--border); border-radius:12px; box-shadow:var(--shadow);
+    padding:14px 16px; text-decoration:none; transition:border-color .12s ease;
+  }
+  .news-card:hover, .yt-card:hover{ border-color:var(--accent); }
+  .news-title{ font-size:13.5px; font-weight:600; color:var(--ink); line-height:1.5; }
+  .news-meta{ font-size:11.5px; color:var(--muted); margin-top:6px; font-variant-numeric:tabular-nums; }
 
   @media (max-width: 880px){
     .app-shell{ flex-direction:column; }
@@ -230,21 +276,21 @@
         <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="2" width="7" height="7" rx="1.5"/><rect x="11" y="2" width="7" height="7" rx="1.5"/><rect x="2" y="11" width="7" height="7" rx="1.5"/><rect x="11" y="11" width="7" height="7" rx="1.5"/></svg>
         한눈에 보기
       </button>
-      <button data-target="category">
-        <svg viewBox="0 0 20 20" fill="currentColor"><rect x="3" y="10" width="3" height="7" rx="1"/><rect x="8.5" y="5.5" width="3" height="11.5" rx="1"/><rect x="14" y="2.5" width="3" height="14.5" rx="1"/></svg>
-        카테고리 비교
-      </button>
-      <button data-target="rating">
-        <svg viewBox="0 0 20 20" fill="currentColor"><polygon points="10,2 12.0,7.25 17.61,7.53 13.23,11.05 14.70,16.47 10,13.4 5.30,16.47 6.77,11.05 2.39,7.53 8.00,7.25"/></svg>
-        별점 분포
-      </button>
-      <button data-target="competitor">
+      <button data-target="reviews">
         <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="7" cy="10" r="5.2"/><circle cx="13" cy="10" r="5.2"/></svg>
-        경쟁 앱 리뷰
+        리뷰 분석
       </button>
-      <button data-target="own">
-        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M4,2.5 L4,17.5 M4,3 L15.5,3 L12.3,7 L15.5,11 L4,11"/></svg>
-        자사 리뷰 분석
+      <button data-target="features">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="7.2"/><polyline points="7,10.5 10,7 13,10.5"/><line x1="10" y1="7" x2="10" y2="13.5"/></svg>
+        신규 기능 동향
+      </button>
+      <button data-target="news">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3.5" y="2.5" width="13" height="15" rx="1.5"/><line x1="6.5" y1="6.5" x2="13.5" y2="6.5"/><line x1="6.5" y1="10" x2="13.5" y2="10"/><line x1="6.5" y1="13.5" x2="11" y2="13.5"/></svg>
+        업계 뉴스
+      </button>
+      <button data-target="youtube">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2.5" y="4" width="15" height="12" rx="3"/><polygon points="8.3,7.3 13.3,10 8.3,12.7" fill="currentColor" stroke="none"/></svg>
+        유튜브/소셜 트렌드
       </button>
     </nav>
 
@@ -264,17 +310,20 @@
 
     <div class="content">
 
+      <!-- ============ 한눈에 보기 (개요 + 카테고리 + 별점) ============ -->
       <section class="panel active" id="panel-overview">
         <div class="summary-card">
 <p>이번 리포트는 구글플레이 최신 리뷰를 기준으로 랭플릭스와 경쟁 앱(스픽, 듀오링고)의 리뷰 동향을 정리한 것입니다.</p>
 <p>랭플릭스는 평균 별점 <b>4.01</b>점, 불만율 <b>31.1%</b>이며, 가장 많이 제기된 불만은 '가격/구독'(42.9%)입니다.</p>
-<p>듀오링고은 평균 4.29점, 불만율 18.0%이며 최다 불만 카테고리는 '버그/오류'(22.9%)입니다. 스픽은 평균 4.43점, 불만율 14.8%이며 최다 불만 카테고리는 '가격/구독'(27.1%)입니다.</p>
+<p>듀오링고은 평균 4.29점, 불만율 18.0%이며 최다 불만 카테고리는 '버그/오류'(22.9%)입니다.</p>
+<p>스픽은 평균 4.43점, 불만율 14.8%이며 최다 불만 카테고리는 '가격/구독'(27.1%)입니다.</p>
           <div class="note">수집 기준은 앱별 최신 리뷰 최대 800건입니다(랭플릭스는 리뷰 수가 적어 전체 90건을 모두 포함). 리뷰가 자주 달리는 앱일수록 800건이 더 짧은 기간에 몰려 있어 앱마다 실제 수집 기간이 다릅니다 — 듀오링고 2026-06-23 ~ 2026-07-20 (800건) · 스픽 2026-03-11 ~ 2026-07-21 (800건) · 랭플릭스 2025-05-20 ~ 2026-07-19 (90건).</div>
         </div>
 
-        <h2 class="section-title">앱별 핵심 지표</h2>
-        <div class="section-sub"><p>각 앱의 구글플레이 한국어 리뷰를 최신순으로 수집한 결과입니다.</p><p>불만율은 별점 3점 이하 리뷰의 비중입니다.</p></div>
-        <div class="stat-grid">
+        <div class="block">
+          <h2 class="section-title">앱별 핵심 지표</h2>
+          <div class="section-sub"><p>각 앱의 구글플레이 한국어 리뷰를 최신순으로 수집한 결과입니다.</p><p>불만율은 별점 3점 이하 리뷰의 비중입니다.</p></div>
+          <div class="stat-grid">
 
       <div class="stat-card" style="--app-color:var(--duo)">
         <div class="app-name"><span class="dot"></span>듀오링고</div>
@@ -305,117 +354,93 @@
           <div class="row"><span class="lbl"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="14" height="13" rx="1.5"/><line x1="3" y1="8" x2="17" y2="8"/><line x1="7" y1="2.5" x2="7" y2="5.5"/><line x1="13" y1="2.5" x2="13" y2="5.5"/></svg><span>수집 기간</span></span><span>2025-05-20 ~ 2026-07-19</span></div>
         </div>
       </div>
-        </div>
-      </section>
-
-      <section class="panel" id="panel-category">
-        <h2 class="section-title">불만 카테고리 비교</h2>
-        <div class="section-sub"><p>불만 리뷰(★3 이하) 중 각 카테고리 키워드가 언급된 비율입니다.</p><p>한 리뷰가 여러 카테고리에 동시에 잡힐 수 있어 앱별 합계는 100%가 아닙니다.</p></div>
-        <div class="chart-card">
-          <div class="legend">
-            <div class="item"><span class="swatch" style="background:var(--duo)"></span>듀오링고</div>
-            <div class="item"><span class="swatch" style="background:var(--speak)"></span>스픽</div>
-            <div class="item"><span class="swatch" style="background:var(--lang)"></span>랭플릭스</div>
-          </div>
-          <div class="cat-chart" id="catChart"></div>
-        </div>
-      </section>
-
-      <section class="panel" id="panel-rating">
-        <h2 class="section-title">별점 분포</h2>
-        <div class="section-sub"><p>전체 수집 리뷰 기준 별점 비중입니다.</p></div>
-        <div class="chart-card">
-          <div class="legend">
-            <div class="item"><span class="swatch" style="background:var(--r1)"></span>1점</div>
-            <div class="item"><span class="swatch" style="background:var(--r2)"></span>2점</div>
-            <div class="item"><span class="swatch" style="background:var(--r3)"></span>3점</div>
-            <div class="item"><span class="swatch" style="background:var(--r4)"></span>4점</div>
-            <div class="item"><span class="swatch" style="background:var(--r5)"></span>5점</div>
-          </div>
-          <div class="rating-chart" id="ratingChart"></div>
-        </div>
-      </section>
-
-      <section class="panel" id="panel-competitor">
-        <h2 class="section-title">경쟁 앱 리뷰 동향</h2>
-        <div class="section-sub"><p>공감수(👍) 상위 불만 리뷰 기준으로 정리했습니다.</p></div>
-
-        <div class="app-sub">
-          <h3><span class="dot" style="background:var(--duo)"></span>듀오링고</h3>
-          <div class="chips">
-        <span class="chip"><b>문제</b> 33</span>
-        <span class="chip"><b>단어</b> 22</span>
-        <span class="chip"><b>오류</b> 21</span>
-        <span class="chip"><b>버그</b> 19</span>
-        <span class="chip"><b>발음</b> 18</span>
-        <span class="chip"><b>결제</b> 16</span>
-        <span class="chip"><b>학습</b> 15</span>
-        <span class="chip"><b>공부</b> 14</span>
-          </div>
-          <div class="quote-grid">
-        <div class="quote-card">
-          <div class="qmeta"><span class="score">1점</span><span>2026-06-24</span><span>· 공감 9</span></div>
-          <p>일년넘게 듀오 이용중입니다. 그런데 월드컵 수트 이벤트 왜안되요 ㅜㅠ 누군 되고 누군 안되는 그런 이벤튼가요 ㅜㅠ 지워도보고 업데이트가 있나 확인도해밨지만 안되요 ㅜㅠ 체스 처음 나올때도 늦게 적용되더니 이번엔 이벤트가 아예안대여 ㅜ</p>
-          
-        </div>
-        <div class="quote-card">
-          <div class="qmeta"><span class="score">1점</span><span>2026-06-24</span><span>· 공감 9</span></div>
-          <p>재미로 접근하는 건 괜찮지만 내용이나 시스템 오류 많음 단계 진행이 자꾸 처음으로 돌아감 짜증나는 건 리더보드에 20분에 7,000xp / 1분에 30,000xp 올리는 cheater들이 판치는데 신고해도 매크로로 돌리는 부정행위자들처럼 자동답변만 오고 절대 처리 안 함. 유료 결제할 가치가 없음. 결제만 받고 회원들 관리는 안 하는 듯</p>
-          <div class="tags"><span class="tag">가격/구독</span><span class="tag">버그/오류</span><span class="tag">고객지원</span></div>
-        </div>
-        <div class="quote-card">
-          <div class="qmeta"><span class="score mid">3점</span><span>2026-06-28</span><span>· 공감 8</span></div>
-          <p>꾸준히 하고 있는대 자주 등장하는 이상한 문제나 정답들 문의해도 바뀐적이 없이 매번 똑같은 오류로 나오고, 공부 도중 에너지 있는대도 충전 또는 구독 안하면 경험치 포기뿐이고 어차피 사람들이 이용하니까 무시하는 느낌이 드네요.</p>
-          <div class="tags"><span class="tag">가격/구독</span><span class="tag">버그/오류</span><span class="tag">스트릭/동기부여</span><span class="tag">고객지원</span></div>
-        </div>
           </div>
         </div>
 
-        <div class="app-sub">
-          <h3><span class="dot" style="background:var(--speak)"></span>스픽</h3>
-          <div class="chips">
-        <span class="chip"><b>인식</b> 34</span>
-        <span class="chip"><b>환불</b> 30</span>
-        <span class="chip"><b>결제</b> 28</span>
-        <span class="chip"><b>취소</b> 21</span>
-        <span class="chip"><b>구독</b> 19</span>
-        <span class="chip"><b>음성</b> 17</span>
-        <span class="chip"><b>대화</b> 15</span>
-        <span class="chip"><b>문제</b> 12</span>
+        <div class="block">
+          <h2 class="section-title">불만 카테고리 비교</h2>
+          <div class="section-sub"><p>불만 리뷰(★3 이하) 중 각 카테고리 키워드가 언급된 비율입니다.</p><p>한 리뷰가 여러 카테고리에 동시에 잡힐 수 있어 앱별 합계는 100%가 아닙니다.</p></div>
+          <div class="chart-card">
+            <p class="chart-caption">막대가 길수록 해당 카테고리 불만이 그 앱의 불만 리뷰 중에서 더 자주 언급됐다는 뜻입니다. (기준: 해당 앱 불만 리뷰 수 대비 %)</p>
+            <div class="legend">
+              <div class="item"><span class="swatch" style="background:var(--duo)"></span>듀오링고</div>
+              <div class="item"><span class="swatch" style="background:var(--speak)"></span>스픽</div>
+              <div class="item"><span class="swatch" style="background:var(--lang)"></span>랭플릭스</div>
+            </div>
+            <div class="cat-axis"><div class="cat-axis-line" id="catAxisLine"></div><div class="cat-axis-val-spacer"></div></div>
+            <div class="cat-chart" id="catChart"></div>
           </div>
-          <div class="quote-grid">
-        <div class="quote-card">
-          <div class="qmeta"><span class="score">1점</span><span>2026-03-13</span><span>· 공감 26</span></div>
-          <p>다시 리뷰 할게요 특정 단어 하나만 못 알아듣는 게 아니라 랜덤으로 인식이 안 되는 거였네요 앞에선 잘 얘기한 단어를 뒤에서 다시 말할 땐 갑자기 인식이 안 됩니다. 이게 무료 앱이었으면 저도 그냥 넘어갔을 겁니다. 근데 아니잖아요. 저 스픽을 이제 일주일밖에 안 썼습니다. 스피킹 위주로 공부하는 앱이 음성인식에 문제가 있는 게 말이 된다고 생각합니까? 다른 후기들 보면 이미 작년부터…</p>
-          <div class="tags"><span class="tag">광고</span></div>
         </div>
-        <div class="quote-card">
-          <div class="qmeta"><span class="score">1점</span><span>2026-03-12</span><span>· 공감 22</span></div>
-          <p>요즘 유사 어플이 얼마나 많은데, 무슨 한탕 장사하고 접을 생각으로 운영하시나요? 일단 예고 된 갱신 일보다 하루 전에 선결제 되는 어플은 살면서 처음보고요.(하루전에 결제 될거란 고지를 해주는것도 아니고 무려 하루 전에 먼저 결제부터 해버림 ㅋㅋㅋ) 결제가 됐으면 어떤식으로든 영수증을 보내줘야지 돈이 허공에서 없어진 것도 아니고 돈은 빠져나갔는데, 그 어떤 수단으로도 영수증 확인은 안되고…</p>
-          <div class="tags"><span class="tag">가격/구독</span><span class="tag">스트릭/동기부여</span><span class="tag">고객지원</span></div>
-        </div>
-        <div class="quote-card">
-          <div class="qmeta"><span class="score">1점</span><span>2026-03-19</span><span>· 공감 21</span></div>
-          <p>저는 1년 넘게 프리토킹을 사용했습니다. 스픽에서 프로그램 업그레이드를 하고 있는것 같은데 최근들어 일주일 전후 (26.3)에 답변을 할때 녹음버튼을 누르고 말을 하는것으로 바뀐것 같습니다. 문제점은 1. 길게 대답하면 반응없음 2. 길게 대답하면 완전히 다른 한 문장으로 대체 어떻게해야 이전처럼 사용할 수있나요? 빠른 대답 부탁드립니다. 1년치 재결제했는데 이렇게는 사용 불가할듯 합니다.</p>
-          <div class="tags"><span class="tag">가격/구독</span><span class="tag">UX/사용성</span><span class="tag">고객지원</span></div>
-        </div>
+
+        <div class="block">
+          <h2 class="section-title">별점 분포</h2>
+          <div class="section-sub"><p>전체 수집 리뷰 기준 별점 비중입니다.</p></div>
+          <div class="chart-card">
+            <p class="chart-caption">막대 안 색 블록이 클수록 해당 별점을 준 리뷰 비중이 높다는 뜻입니다. (기준: 전체 수집 리뷰 수 대비 %, 8% 이상 구간엔 값을 직접 표시)</p>
+            <div class="legend">
+              <div class="item"><span class="swatch" style="background:var(--r1)"></span>1점</div>
+              <div class="item"><span class="swatch" style="background:var(--r2)"></span>2점</div>
+              <div class="item"><span class="swatch" style="background:var(--r3)"></span>3점</div>
+              <div class="item"><span class="swatch" style="background:var(--r4)"></span>4점</div>
+              <div class="item"><span class="swatch" style="background:var(--r5)"></span>5점</div>
+            </div>
+            <div class="rating-chart" id="ratingChart"></div>
           </div>
         </div>
       </section>
 
-      <section class="panel" id="panel-own">
-        <h2 class="section-title">자사 리뷰 분석 — 랭플릭스</h2>
+      <!-- ============ 리뷰 분석 (경쟁 + 자사) ============ -->
+      <section class="panel" id="panel-reviews">
+        <div class="block">
+          <h2 class="section-title">경쟁 앱 리뷰 동향</h2>
+          <div class="section-sub"><p>기본값은 공감수(👍) 상위 불만 리뷰입니다.</p><p>키워드 칩을 누르면 해당 단어가 포함된 리뷰만 모아 볼 수 있습니다.</p></div>
 
-        <div class="chart-card trend-wrap">
-          <div class="section-sub" style="margin-bottom:10px;"><p>월별 불만 리뷰(★3 이하) 건수</p></div>
-          <svg viewBox="0 0 600 160" id="trendSvg">
-            <line x1="30" y1="130" x2="570" y2="130" stroke="var(--hairline)" stroke-width="1"/>
-            <path d="M30.0,130 L30.0,116.34 L84.0,116.34 L138.0,61.68 L192.0,102.67 L246.0,102.67 L300.0,116.34 L354.0,116.34 L408.0,89.01 L462.0,116.34 L516.0,34.35 L570.0,75.34 L570.0,130 Z" fill="var(--lang)" opacity="0.1"/>
-            <polyline points="30.0,116.34 84.0,116.34 138.0,61.68 192.0,102.67 246.0,102.67 300.0,116.34 354.0,116.34 408.0,89.01 462.0,116.34 516.0,34.35 570.0,75.34" fill="none" stroke="var(--lang)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
-            <g id="trendDots"></g>
-            <text x="516.0" y="24.35" text-anchor="middle" font-size="12" font-weight="700" fill="var(--ink)">7건 (최고)</text>
+          <div class="app-sub">
+            <h3><span class="dot" style="background:var(--duo)"></span>듀오링고</h3>
+            <div class="chips" data-app="duo">
+        <button type="button" class="chip" data-keyword="문제"><b>문제</b> 33</button>
+        <button type="button" class="chip" data-keyword="단어"><b>단어</b> 22</button>
+        <button type="button" class="chip" data-keyword="오류"><b>오류</b> 21</button>
+        <button type="button" class="chip" data-keyword="버그"><b>버그</b> 19</button>
+        <button type="button" class="chip" data-keyword="발음"><b>발음</b> 18</button>
+        <button type="button" class="chip" data-keyword="결제"><b>결제</b> 16</button>
+        <button type="button" class="chip" data-keyword="학습"><b>학습</b> 15</button>
+        <button type="button" class="chip" data-keyword="공부"><b>공부</b> 14</button>
+            </div>
+            <div class="filter-status" data-app="duo"><span class="label"></span><button type="button" class="reset">✕ 필터 해제</button></div>
+            <div class="quote-grid" data-app="duo"></div>
+          </div>
+
+          <div class="app-sub">
+            <h3><span class="dot" style="background:var(--speak)"></span>스픽</h3>
+            <div class="chips" data-app="speak">
+        <button type="button" class="chip" data-keyword="인식"><b>인식</b> 34</button>
+        <button type="button" class="chip" data-keyword="환불"><b>환불</b> 30</button>
+        <button type="button" class="chip" data-keyword="결제"><b>결제</b> 28</button>
+        <button type="button" class="chip" data-keyword="취소"><b>취소</b> 21</button>
+        <button type="button" class="chip" data-keyword="구독"><b>구독</b> 19</button>
+        <button type="button" class="chip" data-keyword="음성"><b>음성</b> 17</button>
+        <button type="button" class="chip" data-keyword="대화"><b>대화</b> 15</button>
+        <button type="button" class="chip" data-keyword="문제"><b>문제</b> 12</button>
+            </div>
+            <div class="filter-status" data-app="speak"><span class="label"></span><button type="button" class="reset">✕ 필터 해제</button></div>
+            <div class="quote-grid" data-app="speak"></div>
+          </div>
+        </div>
+
+        <div class="block">
+          <h2 class="section-title">자사 리뷰 분석 — 랭플릭스</h2>
+
+          <div class="chart-card trend-wrap">
+            <div class="section-sub" style="margin-bottom:10px;"><p>월별 불만 리뷰(★3 이하) 건수</p></div>
+            <svg viewBox="0 0 600 160" id="trendSvg">
+              <line x1="30" y1="130" x2="570" y2="130" stroke="var(--hairline)" stroke-width="1"/>
+              <path d="M30.0,130 L30.0,116.34 L84.0,116.34 L138.0,61.68 L192.0,102.67 L246.0,102.67 L300.0,116.34 L354.0,116.34 L408.0,89.01 L462.0,116.34 L516.0,34.35 L570.0,75.34 L570.0,130 Z" fill="var(--lang)" opacity="0.1"/>
+              <polyline points="30.0,116.34 84.0,116.34 138.0,61.68 192.0,102.67 246.0,102.67 300.0,116.34 354.0,116.34 408.0,89.01 462.0,116.34 516.0,34.35 570.0,75.34" fill="none" stroke="var(--lang)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+              <g id="trendDots"></g>
+              <text x="516.0" y="24.35" text-anchor="middle" font-size="12" font-weight="700" fill="var(--ink)">7건 (최고)</text>
         <text x="570.0" y="65.34" text-anchor="middle" font-size="11.5" font-weight="700" fill="var(--ink)">4건*</text>
-            <g font-size="9" fill="var(--muted)">
+              <g font-size="9" fill="var(--muted)">
           <text x="30.0" y="147" text-anchor="middle">25.05</text>
           <text x="84.0" y="147" text-anchor="middle">25.09</text>
           <text x="138.0" y="147" text-anchor="middle">25.11</text>
@@ -427,55 +452,238 @@
           <text x="462.0" y="147" text-anchor="middle">26.05</text>
           <text x="516.0" y="147" text-anchor="middle">26.06</text>
           <text x="570.0" y="147" text-anchor="middle">26.07</text>
-            </g>
-          </svg>
-          <p class="trend-note">* 2026-07은 2026-07-19까지 수집된 부분 데이터입니다.</p>
+              </g>
+            </svg>
+            <p class="trend-note">* 2026-07은 2026-07-19까지 수집된 부분 데이터입니다.</p>
 
-          <table class="version-table">
-            <thead><tr><th>버전</th><th>불만 리뷰 수</th></tr></thead>
-            <tbody>
+            <table class="version-table">
+              <thead><tr><th>버전</th><th>불만 리뷰 수</th></tr></thead>
+              <tbody>
         <tr><td>1.6.24</td><td>5건</td></tr>
         <tr><td>1.6.41</td><td>3건</td></tr>
         <tr><td>1.6.35</td><td>3건</td></tr>
         <tr><td>1.6.30</td><td>2건</td></tr>
         <tr><td>1.6.40</td><td>2건</td></tr>
-            </tbody>
-          </table>
-        </div>
+              </tbody>
+            </table>
+          </div>
 
-        <div class="app-sub" style="margin-top:24px;">
-          <div class="chips">
-        <span class="chip"><b>오류</b> 16</span>
-        <span class="chip"><b>업데이트</b> 13</span>
-        <span class="chip"><b>학습</b> 12</span>
-        <span class="chip"><b>영상</b> 12</span>
-        <span class="chip"><b>결제</b> 10</span>
-        <span class="chip"><b>유료</b> 10</span>
-        <span class="chip"><b>기능</b> 9</span>
-        <span class="chip"><b>반복</b> 7</span>
+          <div class="app-sub" style="margin-top:24px;">
+            <div class="chips" data-app="lang">
+        <button type="button" class="chip" data-keyword="오류"><b>오류</b> 16</button>
+        <button type="button" class="chip" data-keyword="업데이트"><b>업데이트</b> 13</button>
+        <button type="button" class="chip" data-keyword="학습"><b>학습</b> 12</button>
+        <button type="button" class="chip" data-keyword="영상"><b>영상</b> 12</button>
+        <button type="button" class="chip" data-keyword="결제"><b>결제</b> 10</button>
+        <button type="button" class="chip" data-keyword="유료"><b>유료</b> 10</button>
+        <button type="button" class="chip" data-keyword="기능"><b>기능</b> 9</button>
+        <button type="button" class="chip" data-keyword="반복"><b>반복</b> 7</button>
+            </div>
+            <div class="filter-status" data-app="lang"><span class="label"></span><button type="button" class="reset">✕ 필터 해제</button></div>
+            <div class="quote-grid" data-app="lang"></div>
           </div>
-          <div class="quote-grid">
-        <div class="quote-card">
-          <div class="qmeta"><span class="score mid">3점</span><span>2025-11-30</span><span>· 공감 13</span></div>
-          <p>매일 자기전 랭플릭스로 공부하고 자는게 낙이였는데 갑자기 거의 모든게 유료화 되어버렸네요... 기존 사용자들을 위해 유료구독 하지 않아도 기본 기능은 사용할 수 있었으면 좋았을 것 같은데 많이 아쉽습니다 거의 모든 기능이 유료결제 하지않으면 사용할 수 없게 되었네요 하루 복습만이라도 무료이용이 가능했다면 어땠을까하는 아쉬움이 남습니다</p>
-          <div class="tags"><span class="tag">가격/구독</span></div>
         </div>
-        <div class="quote-card">
-          <div class="qmeta"><span class="score mid">3점</span><span>2025-11-30</span><span>· 공감 13</span></div>
-          <p>무료로 매일 영화 속 대사로 단어와 숙어, 일상에서는 어떻게 활용되는지까지 학습할 수 있어서 너무 잘 쓰고 있었습니다. 다만 오늘(27일)부터 앱이 업데이트가 되었는지 갑자기 '일상에선 이렇게 말해요'랑 학습도 2개만 가능하고 더 하고싶으면 멤버십 결제를 해야하네요.... 잘쓰고 있는 어플이었는데 갑작스럽게 유료화되어서 당황스러워요 업데이트 전에 미리 공지를 해주셨으면 어땠을까하는 아쉬움이…</p>
-          <div class="tags"><span class="tag">가격/구독</span></div>
-        </div>
-        <div class="quote-card">
-          <div class="qmeta"><span class="score">1점</span><span>2025-12-30</span><span>· 공감 11</span></div>
-          <p>이번 달에만 3번을 앱이 작동을 안 해서 앱 사용을 못했습니다. 지금도 그렇고요. 유료 결제까지 해서 사용하고 있는데 앱을 쓰지를 못하면 조치라도 취해주셔야 하는게 아닌가요? 아무 공지도 사과도 없고 운영을 왜 이렇게 하시는지 모르겠네요. 빠른 복구 부탁드립니다.</p>
-          <div class="tags"><span class="tag">가격/구독</span></div>
-        </div>
-        <div class="quote-card">
-          <div class="qmeta"><span class="score mid">3점</span><span>2025-11-29</span><span>· 공감 6</span></div>
-          <p>최근에 이 앱을 알게되어서 이주 안되게 사용하고 있었는데 갑작스러운 유료전환은 아쉬워요ㅠㅠ 공지라도 있었으면 좋았겠다는 생각이 드네요 .. 사실상 무료로는 아무기능도 사용하지 못하게 다 막혀버려서.. 타 어플에 비해 구독료도 저렴한 편이 아니라 아쉽게 느껴져요 중간중간 오류도 꽤 있어서(음성 안들림, 버튼 안눌림 등) 결제까지 해야될 지 더 고민되네요...</p>
-          <div class="tags"><span class="tag">가격/구독</span><span class="tag">버그/오류</span><span class="tag">UX/사용성</span></div>
-        </div>
+      </section>
+
+      <!-- ============ 신규 기능 동향 ============ -->
+      <section class="panel" id="panel-features">
+        <h2 class="section-title">신규 기능/업데이트 동향</h2>
+        <div class="section-sub"><p>구글플레이가 "새 소식(변경사항)" 텍스트를 더 이상 공개하지 않아, 공식 릴리즈 노트 대신 스토어의 최신 업데이트 날짜·버전과 리뷰에 포착된 변경사항 언급으로 구성했습니다.</p></div>
+
+      <div class="app-sub">
+        <h3><span class="dot" style="background:var(--duo)"></span>듀오링고</h3>
+        <div class="feature-meta">최근 업데이트 <b>2026-07-21</b> · 버전 <b>Varies with device</b></div>
+        <div class="section-sub"><p>아래는 공식 릴리즈 노트가 아니라, 리뷰 원문에서 "업데이트/추가/이벤트" 등 변경 관련 표현이 포착된 리뷰입니다.</p></div>
+        <div class="feature-grid">
+          <div class="feature-card">
+            <div class="qmeta"><span>2026-07-07</span><span>· v6.86.5</span><span>· 공감 2</span></div>
+            <p>업데이트하니 일본어위에 영어가 너무거슬리고 오히려 일본어를 안보게되요ㅜ영어없애주세요</p>
           </div>
+          <div class="feature-card">
+            <div class="qmeta"><span>2026-07-05</span><span>· v6.86.4</span><span>· 공감 22</span></div>
+            <p>※ 제발 저도 듀오 컵 이벤트 좀 바로 나오게 해주세요~ 제 느낌상 수트는 늦게 시작하면 늦은 만큼 더 오래 하는 것 같고 아예 안 나오면.... 어쩔수 없고요. 엉큼한 고양이 수트나 핫도그 수트 어디서 얻는지 궁금했는데 찾아보니 이미 기간도 지났더라고요! 왜 저는 안 뜨는건지 묻고싶고 일단 본론 들어가겠습니다. 이 앱의 장점은 매일 1일 1학습을 하게 만든다 / 여러 언어들이 있다. 이 앱의 단점은 매일 듀오가 집착한다 /…</p>
+          </div>
+          <div class="feature-card">
+            <div class="qmeta"><span>2026-07-05</span><span>· v6.86.4</span><span>· 공감 3</span></div>
+            <p>저는 듀오링고 1년차플레이어입니다. 듀오링고는정말 재밌는 앱으로인정해요! 다만 슈퍼 듀오링고를사지않으면 광고가 계속 뜨는면이 아쉽습니다. 그것말고 단점이 없어요. 제가 리뷰를 작성 할때부터 느꼈던 소감이 제가 하다보면 새로운단어도 익숙해지니까 쉽더라고요! 초보자도 쉽게 학습할수있습니다.😄</p>
+          </div>
+          <div class="feature-card">
+            <div class="qmeta"><span>2026-07-04</span><span>· v6.86.4</span><span>· 공감 1</span></div>
+            <p>듀오링고 일본어하고 있는데 처음엔 너무 재밌고 실력이 늘어나는 재미에 180일가량 빼먹지않고 했는데요. 유료사용중입니다. 요새 업데이트되면 몇가지 시스템에서 버그가 발생되서 화가납니다.!!!!! 우선 단어 발음이 정확하지 않아도 그냥 정답처리가 됩니다. 비슷하지 않아도 정답처리됨. 한국어로 답해도 정답임 그리고 오늘 화가난건 글을보고 단어를 순서대로 놓는거에서 단어가 6개라면 5개 올리고 마지막 단어 선택하면 단어가 선택되어…</p>
+          </div>
+          <div class="feature-card">
+            <div class="qmeta"><span>2026-07-04</span><span>· v6.86.4</span><span>· 공감 4</span></div>
+            <p>안녕하세요 듀오링고를무료로 50일은 간 유저입니다. 듀오링고가 장점도 있지만 단점도 있는데요. 장점은 무료로 배울수 있다는점, 재미있다는점 등등이 있는데요. 하지만 단점은, 알림이 너무 많이 온다는점, 앱아이콘이 너무 무섭다는점, 광고가 너무 많이 나온다는 점, 업데이트가 너무 자주된다는 점, 앱 아이템이 나오지 않는다는 점 등등이 있는데요.전 솔직히 비추? 까진 아니지만 깔아보시면 아실겁니다. 이러한 점 참고해서…</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="app-sub">
+        <h3><span class="dot" style="background:var(--speak)"></span>스픽</h3>
+        <div class="feature-meta">최근 업데이트 <b>2026-07-15</b> · 버전 <b>4.57.0</b></div>
+        <div class="section-sub"><p>아래는 공식 릴리즈 노트가 아니라, 리뷰 원문에서 "업데이트/추가/이벤트" 등 변경 관련 표현이 포착된 리뷰입니다.</p></div>
+        <div class="feature-grid">
+          <div class="feature-card">
+            <div class="qmeta"><span>2026-07-12</span><span>· v4.55.0</span><span>· 공감 1</span></div>
+            <p>기초를 위한 패턴연습량은 무척 많음. 기능이 추가되어 모르는 부분 바로 묻기에 최적화됨. 간단한 회화 연습은 좋지만 심화는 안됨. 더 대화를 길게 하고 싶은데 그냥 끊어버림. 진짜 회화의 느낌은 아님. 초급에 매우 유용.</p>
+          </div>
+          <div class="feature-card">
+            <div class="qmeta"><span>2026-07-11</span><span>· v4.55.0</span><span>· 공감 1</span></div>
+            <p>이만한 앱 없긴 한데 스킬테스트 중 캐릭터의 음성은 나올때마다 깨지네요 한 번에 못 들어서 문제를 풀기 위해 손으로 다시 재생해야 하는 일이 빈번합니다. 심지어 앱을 한 번 나갔다 들어오면 그냥 재생이 안됩니다. 그냥 스킬테스트 자체가 버그 덩어리 입니다 방금은 음성 재생이 별 이유도 없이 두 번 됐어요. 프리미엄 플러스 이번에 사봤는데 3D 캐릭터가 나오는 건 솔직히 좀 거슬리네요 깔끔한게 더 좋은듯... 이게 업데이트…</p>
+          </div>
+          <div class="feature-card">
+            <div class="qmeta"><span>2026-07-02</span><span>· v4.54.0</span><span>· 공감 0</span></div>
+            <p>업데이트 이후 수업 진행시 버퍼링이 너무 잦아졌습니다.</p>
+          </div>
+          <div class="feature-card">
+            <div class="qmeta"><span>2026-07-01</span><span>· v4.54.0</span><span>· 공감 0</span></div>
+            <p>매일 새로운 학습 방법이 재미있고 한단계씩 넘어갈수록 내공이 쌓이는것 같아서 재미있는 공부를 하고있습니다</p>
+          </div>
+          <div class="feature-card">
+            <div class="qmeta"><span>2026-06-29</span><span>· v4.54.0</span><span>· 공감 0</span></div>
+            <p>free talk 에서 자꾸앱이 죽습니다. 업데이트이후에그런것같습니다.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="app-sub">
+        <h3><span class="dot" style="background:var(--lang)"></span>랭플릭스</h3>
+        <div class="feature-meta">최근 업데이트 <b>2026-07-16</b> · 버전 <b>1.6.43</b></div>
+        <div class="section-sub"><p>아래는 공식 릴리즈 노트가 아니라, 리뷰 원문에서 "업데이트/추가/이벤트" 등 변경 관련 표현이 포착된 리뷰입니다.</p></div>
+        <div class="feature-grid">
+          <div class="feature-card">
+            <div class="qmeta"><span>2026-06-18</span><span>· v1.6.41</span><span>· 공감 2</span></div>
+            <p>예전부터 문의도 몇 번 넣어봤는데 해결이 안되었습니다. 몇 개월 쓰면서 오류 나고 튕긴 적이 얼마나 많은지 모르겠어요. 앱 사용하며 지금도 충분히 불편하거나 부족하다 느껴지는 것 없이 랭플릭스만의 매력이 있다 생각했습니다. 계속 UI 바꾸고 업데이트하면서 오류나 로딩지연만 늘어나는 것 같아요.. 업데이트 필요없으니 오류 많은 것부터 고쳐주세요. 다른 후기들처럼 기껏 결제까지 해놓고 오류가 잦아 잘 안찾게 되네요</p>
+          </div>
+          <div class="feature-card">
+            <div class="qmeta"><span>2026-06-13</span><span>· v1.6.40</span><span>· 공감 1</span></div>
+            <p>앱에 자잘한 오류가 너무너무 많아서 불편해서ㅜ잘 안키게되요 어떻게든 흥미붙이려고 써보고 있는데 업데이트도 너무 잦고 업데이트 해도 오류가 자잘하게 너무 많습니다 1. 스크롤 할때 너무 버벅임(둘러보기 페이지) 2. shorts제한. 1200개 가까이 있다는데 둘어보기에서 쇼츠 부분 클릭후 이스트에 18개?정도 밖에 안뜸. 쇼츠도 개인적으로 분류가 있으면 좋겠음 3. 유투브자료로 학습 만들기 할때 자꾸 꼭한번 앱이 강제종료됨…</p>
+          </div>
+          <div class="feature-card">
+            <div class="qmeta"><span>2026-06-12</span><span>· v1.6.40</span><span>· 공감 0</span></div>
+            <p>영어를 매일 하는게 가장 어려운데, 매일 출석체크 이벤트로 반강제로 매일 들어오게되어서 가장 좋았어요 숏츠 보면서 영어공부하는게 그냥 유튜브 보는거같아서 친숙하고 재밌게 공부하게되네요</p>
+          </div>
+          <div class="feature-card">
+            <div class="qmeta"><span>2026-06-08</span><span>· v1.6.39</span><span>· 공감 1</span></div>
+            <p>체험해보고 좋은것같아서 1년 구독했는데요, 업데이트가 너무 잦고 로딩이 너무 오래걸려서 공부하려고 앱을 열었다가도 레슨하나못하고 앱을 닫게되는 일이 잦습니다. 유튜브 영상 검색했을때도 결과가 나오는 로딩 너무 오래걸리고 등등 영어공부를 하려다가도 안하게돼요! 이러면 어플이 무슨 의미인지 잘 모르겠어서 회의감이드네요. 공부 쉽게 자주 하는 김에 구독한건데. 개선부탁합니다. 이런 불안정한 어플.. 시기상조입니다</p>
+          </div>
+          <div class="feature-card">
+            <div class="qmeta"><span>2026-05-18</span><span>· v1.6.36</span><span>· 공감 1</span></div>
+            <p>태블릿으로밖에 공부를 못하는 상황인데, 갑자기 업데이트?되더니 넷플릭스 시청은 pc 확장 프로그램으로만 가능하다고 하면 어떡해요 ㅠㅠ 태블릿으로는 소리가 안 나와요..... 85000원이나 결제했는데... 이 문제 해결해주세요 태블릿 유저들이 엄청 많을텐데;;</p>
+          </div>
+        </div>
+      </div>
+      </section>
+
+      <!-- ============ 업계 뉴스 ============ -->
+      <section class="panel" id="panel-news">
+        <h2 class="section-title">업계 뉴스</h2>
+        <div class="section-sub"><p>Google 뉴스에서 투자유치·정책 변화 등 관련 키워드로 검색한 최근 90일 이내 기사입니다.</p></div>
+        <div class="news-list">
+      <a class="news-card" href="https://news.google.com/rss/articles/CBMiTEFVX3lxTE8xeW5aWHBuMEVCYUgtX25oX2R3QUNvWU1FeC1ORExGRXRacEg4X3NMX0VRTDJTejlHcEh2dVVGVi1Ub1VYQXpiTlJXUVg?oc=5" target="_blank" rel="noopener noreferrer">
+        <div class="news-title">美 Accelerate, AI 에듀테크 스타트업에 최대 25만 달러 보조금 지원…증거 기반 검증이 관건</div>
+        <div class="news-meta">한국AI부동산신문 · 2026-07-21</div>
+      </a>
+      <a class="news-card" href="https://news.google.com/rss/articles/CBMiUkFVX3lxTE4yRnNkNExhMmp1bEl4U293TkhWOFNwNjdBa1B1anlGNElwamx4amUzdjJpWmRxSngzWDBUYk1IUXNXNkFsWXN6TXlGOG9OZXNEWnc?oc=5" target="_blank" rel="noopener noreferrer">
+        <div class="news-title">&quot;영어는 AI 시키면 된다&quot;... 영어 수업, 영어 시험 없애는 중국 대학</div>
+        <div class="news-meta">JTBC · 2026-07-21</div>
+      </a>
+      <a class="news-card" href="https://news.google.com/rss/articles/CBMiTEFVX3lxTE1CRVdiYW16SW5uT1NYY1VDNEFuRWF4QU8yVEd1TjJZdlZKdmZQUUdSY3ZueThCdXJ5N044cW9tV2ZWUlVIQTQxU1lMU04?oc=5" target="_blank" rel="noopener noreferrer">
+        <div class="news-title">[Pocus 심충 분석] 중국대학 영어과목폐지, AI실시간 통역이 부른 대반전</div>
+        <div class="news-meta">한국AI부동산신문 · 2026-07-20</div>
+      </a>
+      <a class="news-card" href="https://news.google.com/rss/articles/CBMiZEFVX3lxTE8xUGx6LUUwS1RMM3J0bzFrRE12NDNGTHFWT2c3LVQ2UlR3ZlUxdUJTYTk5UDVPRlE4ZmppZVk2OWEyLW55Z2t4R3VFbjlqYlc4eXBYRW1Zd2l3VjdPblMtOEozRTQ?oc=5" target="_blank" rel="noopener noreferrer">
+        <div class="news-title">&quot;대화하며 자연스럽게&quot;…AI 영어 학습 `스픽`, 여행 리허설 돕는다</div>
+        <div class="news-meta">디지털데일리 · 2026-07-20</div>
+      </a>
+      <a class="news-card" href="https://news.google.com/rss/articles/CBMiUkFVX3lxTE04ajd6Nlgyd1BkZlVNYndpOVgxRy04THJmNFJpUlhZdkxLOHFWVjY3ekxXRXUtRlFMWmpQSkdMUnZTM3YtV1prdUI2cXVrZ1g4SFE?oc=5" target="_blank" rel="noopener noreferrer">
+        <div class="news-title">듀오링고가 바꾼 것은 UX가 아니었습니다</div>
+        <div class="news-meta">브런치 · 2026-07-20</div>
+      </a>
+      <a class="news-card" href="https://news.google.com/rss/articles/CBMidEFVX3lxTFAyc2lZb1V4UkFNZXJFd1lmME9MYzJJNXBSSk1TaUZvUmFRUHNYMkFKNko1czdBV2IyZDU1TmRvSmNQeFR1UXB2ZGRHUTRQY1N5aTUtQkpMdmc4allYQ1FBSE5fNHFBaGptRGxTZGlfSzVIdGlC?oc=5" target="_blank" rel="noopener noreferrer">
+        <div class="news-title">영어를 잘하려면 틀려야 한다?···스픽이 던진 역설</div>
+        <div class="news-meta">캠페인 인사이트 · 2026-07-19</div>
+      </a>
+      <a class="news-card" href="https://news.google.com/rss/articles/CBMiU0FVX3lxTE1vZlJrdkg3ZS0xT3BkYXdKQXNPdGJDOG9vNXo2LXA5TWN6YVg3azdTU0F2cEdySS0telhlQk9wOXh5OHF5clBRa21OaVhoV2Nuc01V?oc=5" target="_blank" rel="noopener noreferrer">
+        <div class="news-title">&quot;영어는 AI가 다 하는데 왜 배우나&quot;…수업 없애겠다는 中 대학의 파격 실험</div>
+        <div class="news-meta">네이트 · 2026-07-19</div>
+      </a>
+      <a class="news-card" href="https://news.google.com/rss/articles/CBMijgFBVV95cUxPTk5HdFl1QW5Xam5QcWpUbkQzc2dSNmVFTzFnZ1FRZXRUdmplV0xHdlRpZzI5ZmhxcWhDMDNOaXJyOE5sOVBZcG1lMWpNUXJWaHFqUVJjX25hNTB3OG10UVNCMGhHLVptRGhYMHlzZ2JRNTlFMHBVYWRUcF90NHZ3M2JGQmVwM1pKc1NaZWJR?oc=5" target="_blank" rel="noopener noreferrer">
+        <div class="news-title">AI 선생님과 영어 공부… 교육 격차 줄여</div>
+        <div class="news-meta">조선일보 · 2026-07-19</div>
+      </a>
+      <a class="news-card" href="https://news.google.com/rss/articles/CBMixgRBVV95cUxPeldiZXY0Wjl6WlEwc1VQaUJKb25SeEJuRkNEUEFyMzl2bnhiLWdGc3dxdGxPUENhY3VlWUxIUlRiT18wT3dMaFZKLWJ5dzN0S28wemhERG05WkhhT2dZeEowYTdIXzkwQ0QwMzRHTG9FSlBLYno3RXMzdnZkQkRydEJaTHFqaWdMeXVTaVFkSjlnc2hwSmpSeWVWR3laY2NOeDA3Mlp0UmJrenNsdWo1cXhYLUVoSjRCTmF5Tk1MemZKcDdxUUVIX2FVdDNHQ19DREsxZWRadEpNWkVXekRLTXJHNy1QdDVWaS1RVmIwQUVMbVZSVlctVjhEdWpLMmJKWWFrMUtycVJLZ1FsZXA3cEpuODdrWDIyU3N2OW1RT1EyY0VZQ0N5dWtZQ1RwV0VSSEJRQ1ZTM1dPZndkbUV3VWllQVZ1WEVxOTdJc2FiaV9hM2pZcU5RcU1UZDZ3bXJFSzN6cmFZcDg3Mm9YT3ppd2JucENYNVVrNnlpSzlzN0xqcFg4bHh5WGhBZkxNS0RVT3diU3Z5LVBJSER4bW5BTndvMHM0MXlzLW9DRFhYR2VJUzNpdEhNeG9ZOXZCTmdCTnJ6M2RIc3BSbURjUXVIUHNkZ2FmbHJPa2ZUdG5nXzRuVE9GSGhjWFAxeUxPMVFMejAxS09XanVkYjdmdE9mWDd6QVU5UkVTR19hSnJaWWFsbFVmTGRHck5NdFBnVVYwYnY3Z3liTjFqNThqU0hWSjJvUzhOY3UwYWEyMWNQcmNudk8xZEE?oc=5" target="_blank" rel="noopener noreferrer">
+        <div class="news-title">평택시국제교류재단, 'AI 영어 스마트 오피스' 운영…직장인 맞춤형 교육</div>
+        <div class="news-meta">MSN · 2026-07-18</div>
+      </a>
+      <a class="news-card" href="https://news.google.com/rss/articles/CBMihwFBVV95cUxQRDJ2UWRITnlYWlpqN3JtSm1WY2JRcTNYMUFDMTYyNmlWOWREak9QYWN0NUJqSlNIWEo3Mi1sVVpwd3diZVBWYktOOGtuY0FBV0ktck83RkJ0ZHhNNElxUjZucDNFYnVkTThyb0NzNUVieDFYUW5DaGstUjRiMDdjMWh4ZjJoZ0k?oc=5" target="_blank" rel="noopener noreferrer">
+        <div class="news-title">Should You Buy Duolingo Stock After Its 77% Drawdown?</div>
+        <div class="news-meta">TIKR.com · 2026-07-18</div>
+      </a>
+      <a class="news-card" href="https://news.google.com/rss/articles/CBMidEFVX3lxTE9vY3hJUHpSdjBHQnd2M0lLby1GTndSTGJhWEMxVjJVeHR5dk1nYk9hTXUtaG1PQURwVEdkMEtwWEFsZHBNOEFNRVo0ZnRjeld0Y0toZVNxdFNIdXFMcURFSjFzY1phVzhLcktnWGtNY3JrS3RS?oc=5" target="_blank" rel="noopener noreferrer">
+        <div class="news-title">모건 스탠리, 듀오링고 목표주가 상향… 사용자 증가세 주목</div>
+        <div class="news-meta">Investing.com 한국어 · 2026-07-16</div>
+      </a>
+      <a class="news-card" href="https://news.google.com/rss/articles/CBMiWEFVX3lxTFBsdlNhX2dzRTNhZ1VnYkRFWHM0b2t1b2RTSUdSY21taFRRZkZfakYwOThaS3dZcEdHYlpVYk5wMWpoUV9YQUpHRnFPZnJlQ3dyNzl2d1Z4SDQ?oc=5" target="_blank" rel="noopener noreferrer">
+        <div class="news-title">서하초, AI펭톡 마일리지 이벤트 운영…영어 학습 흥미 높여</div>
+        <div class="news-meta">주간함양 · 2026-07-16</div>
+      </a>
+        </div>
+      </section>
+
+      <!-- ============ 유튜브/소셜 트렌드 ============ -->
+      <section class="panel" id="panel-youtube">
+        <h2 class="section-title">유튜브/소셜 트렌드</h2>
+        <div class="section-sub"><p>YouTube Data API로 최근 30일 내 영어학습 관련 화제 영상을 조회수 기준으로 모았습니다.</p></div>
+        <div class="news-list">
+      <a class="yt-card" href="https://www.youtube.com/watch?v=KNoJdDAvMpA" target="_blank" rel="noopener noreferrer">
+        <div class="news-title">sao con duolingo nó #viralvideo #xuhuong #edit  #funny</div>
+        <div class="news-meta">meluotthreads · 조회 3,480,043 · 좋아요 39,962 · 2026-07-11</div>
+      </a>
+      <a class="yt-card" href="https://www.youtube.com/watch?v=GGxtvUVx0XY" target="_blank" rel="noopener noreferrer">
+        <div class="news-title">Airplane English Conversation | Useful Vocabulary &amp;amp; Phrases at the Airport #learnenglish #shorts</div>
+        <div class="news-meta">Aarvi Negi  · 조회 3,224,708 · 좋아요 34,188 · 2026-07-03</div>
+      </a>
+      <a class="yt-card" href="https://www.youtube.com/watch?v=puadT9a6yi8" target="_blank" rel="noopener noreferrer">
+        <div class="news-title">영어천재 되는 법</div>
+        <div class="news-meta">민쩌미 · 조회 1,667,689 · 좋아요 19,802 · 2026-07-08</div>
+      </a>
+      <a class="yt-card" href="https://www.youtube.com/watch?v=yGVbiJ3m-_g" target="_blank" rel="noopener noreferrer">
+        <div class="news-title">Duolingoで日本語勉強するも、、# #vtuber #チビドキ</div>
+        <div class="news-meta">ワールドミント(。ω  °)        【チビドキ日本語】 · 조회 1,427,154 · 좋아요 43,996 · 2026-07-12</div>
+      </a>
+      <a class="yt-card" href="https://www.youtube.com/watch?v=6DGjmKoo4io" target="_blank" rel="noopener noreferrer">
+        <div class="news-title">Duolingo is losing his mind 😭😂</div>
+        <div class="news-meta">CobbleCat · 조회 1,371,163 · 좋아요 35,184 · 2026-06-25</div>
+      </a>
+      <a class="yt-card" href="https://www.youtube.com/watch?v=iGgrnfJdniU" target="_blank" rel="noopener noreferrer">
+        <div class="news-title">(🚨영어실수) 타일러도 영어를 안 쓰면 생기는 황당한 상황 #타일러볼까요 #타일러라쉬 #딘딘 #영어실수 #예능쇼츠</div>
+        <div class="news-meta">MOVIESTARWA · 조회 1,323,419 · 좋아요 11,361 · 2026-06-22</div>
+      </a>
+      <a class="yt-card" href="https://www.youtube.com/watch?v=bjknIr81Xwg" target="_blank" rel="noopener noreferrer">
+        <div class="news-title">Duolingo Life Cycle 🦉</div>
+        <div class="news-meta">Logostern · 조회 781,919 · 좋아요 3,323 · 2026-06-27</div>
+      </a>
+      <a class="yt-card" href="https://www.youtube.com/watch?v=7e7GCcRpOxY" target="_blank" rel="noopener noreferrer">
+        <div class="news-title">영어 능통 편집 할 줄 아는 최저시급 인력 #젠지 #lck #shorts</div>
+        <div class="news-meta">대유쾌마운틴 · 조회 507,218 · 좋아요 5,099 · 2026-06-23</div>
+      </a>
+      <a class="yt-card" href="https://www.youtube.com/watch?v=_-g35kAt9bU" target="_blank" rel="noopener noreferrer">
+        <div class="news-title">연매출 1500억 미국 뷰티 회사 CEO!! 미국에서 일잘러로 살아남은 영어공부 비법 | 전 넷플릭스, 메타, 틱톡 디렉터 돌싱글즈4 이소라님</div>
+        <div class="news-meta">캘리쌤 브이로그 영어 · 조회 254,825 · 좋아요 6,398 · 2026-07-07</div>
+      </a>
+      <a class="yt-card" href="https://www.youtube.com/watch?v=GNTCqdpSni0" target="_blank" rel="noopener noreferrer">
+        <div class="news-title">초등 영어 어떻게 시작할까? 초등 엄마들의 리얼후기</div>
+        <div class="news-meta">아동 전문가들의 육아토크 아육톡 : · 조회 189,411 · 좋아요 6 · 2026-06-30</div>
+      </a>
+      <a class="yt-card" href="https://www.youtube.com/watch?v=5H52E8ygl8o" target="_blank" rel="noopener noreferrer">
+        <div class="news-title">잘 자라고 한 것 뿐인데... #praktika #영어공부 #ai랑놀면서 #영어회화 #영어독학</div>
+        <div class="news-meta">praktikawith-ds · 조회 147,584 · 좋아요 528 · 2026-06-26</div>
+      </a>
+      <a class="yt-card" href="https://www.youtube.com/watch?v=hxAGRUWd5vs" target="_blank" rel="noopener noreferrer">
+        <div class="news-title">알파벳 E 안쓰고 말하기 어케하는건데 !! #praktika #영어공부 #ai랑놀면서 #영어회화 #영어독학</div>
+        <div class="news-meta">praktikawith-ds · 조회 103,887 · 좋아요 233 · 2026-06-23</div>
+      </a>
         </div>
       </section>
 
@@ -556,9 +764,19 @@
     catChart.appendChild(row);
   });
 
+  // category axis (0 / 25 / 50 / 75 / 100% of domain)
+  const axisLine = document.getElementById('catAxisLine');
+  [0, 0.25, 0.5, 0.75, 1].forEach(f => {
+    const s = document.createElement('span');
+    s.style.left = (f*100) + '%';
+    s.textContent = Math.round(DOMAIN_MAX * f) + '%';
+    axisLine.appendChild(s);
+  });
+
   // ---- rating distribution chart ----
   const RATING_DATA = [["듀오링고", "--duo", [10.2, 2.8, 5.0, 11.4, 70.6], [82, 22, 40, 91, 565]], ["스픽", "--speak", [9.0, 1.6, 4.1, 8.1, 77.1], [72, 13, 33, 65, 617]], ["랭플릭스", "--lang", [11.1, 8.9, 11.1, 5.6, 63.3], [10, 8, 10, 5, 57]]];
   const RATING_VARS = ["--r1","--r2","--r3","--r4","--r5"];
+  const RATING_LABEL_COLOR = ['var(--ink)','var(--ink)','#fff','#fff','#fff'];
   const ratingChart = document.getElementById('ratingChart');
   RATING_DATA.forEach(([name, appVar, pcts, counts]) => {
     const row = document.createElement('div');
@@ -575,6 +793,13 @@
       seg.style.width = pct + '%';
       seg.style.background = 'var(' + RATING_VARS[i] + ')';
       seg.tabIndex = 0;
+      if (pct >= 8) {
+        const lbl = document.createElement('span');
+        lbl.className = 'seg-label';
+        lbl.style.color = RATING_LABEL_COLOR[i];
+        lbl.textContent = pct + '%';
+        seg.appendChild(lbl);
+      }
       const tipText = name + ' · ' + (i+1) + '점 · ' + pct + '% (' + counts[i] + '건)';
       seg.addEventListener('pointerenter', () => showTip(seg, tipText));
       seg.addEventListener('pointerleave', hideTip);
@@ -608,6 +833,95 @@
     c.addEventListener('pointerleave', hideTip);
     c.addEventListener('focus', () => showTip(c, tipText));
     c.addEventListener('blur', hideTip);
+  });
+
+  // ---- keyword-filterable review cards ----
+  const APP_CONFIG = {
+    duo:   { complaints: [{"review_text": "일년넘게 듀오 이용중입니다. 그런데 월드컵 수트 이벤트 왜안되요 ㅜㅠ 누군 되고 누군 안되는 그런 이벤튼가요 ㅜㅠ 지워도보고 업데이트가 있나 확인도해밨지만 안되요 ㅜㅠ 체스 처음 나올때도 늦게 적용되더니 이번엔 이벤트가 아예안대여 ㅜ", "score": 1, "date": "2026-06-24", "thumbs_up_count": 9, "matched_categories": "-"}, {"review_text": "재미로 접근하는 건 괜찮지만 내용이나 시스템 오류 많음 단계 진행이 자꾸 처음으로 돌아감 짜증나는 건 리더보드에 20분에 7,000xp / 1분에 30,000xp 올리는 cheater들이 판치는데 신고해도 매크로로 돌리는 부정행위자들처럼 자동답변만 오고 절대 처리 안 함. 유료 결제할 가치가 없음. 결제만 받고 회원들 관리는 안 하는 듯", "score": 1, "date": "2026-06-24", "thumbs_up_count": 9, "matched_categories": "가격/구독, 버그/오류, 고객지원"}, {"review_text": "꾸준히 하고 있는대 자주 등장하는 이상한 문제나 정답들 문의해도 바뀐적이 없이 매번 똑같은 오류로 나오고, 공부 도중 에너지 있는대도 충전 또는 구독 안하면 경험치 포기뿐이고 어차피 사람들이 이용하니까 무시하는 느낌이 드네요.", "score": 3, "date": "2026-06-28", "thumbs_up_count": 8, "matched_categories": "가격/구독, 버그/오류, 스트릭/동기부여, 고객지원"}, {"review_text": "외적인 부분에 대해 말씀드리자면, 올해에 들어서 사진 형식이 아닌 아바타 형식으로 자신을 꾸밀 수 있게 되었는데, 이 아바타가 자신을 다 표현하는게 더 힘들 정도로 선택과 변화의 폭이 좁습니다. 이러니 사람들의 아바타가 다 거기서 거기같고 메리트가 전의 사진 형식보다 현저히 떨어지는 것 같습니다. 기존의 사진보다는 아니더라도 비슷한 메리트를 주기 위해선 아바타 기능에 개선이 많이 필요해보입니다.", "score": 3, "date": "2026-07-05", "thumbs_up_count": 8, "matched_categories": "-"}, {"review_text": "답을 입력하려 하면 키보드에 문제가 가려져서 입력란이 보이지 않을 때가 있어요. 아예 입력이 먹통이 돼서 다음 문제로 넘어가지 못할 때도 있고요. 아주 불편합니다.", "score": 1, "date": "2026-06-25", "thumbs_up_count": 8, "matched_categories": "버그/오류, UX/사용성"}, {"review_text": "듀오링고.. 저는 560일 유저이자, 80일 부계까지 있는 유저 인데요.아이콘 문제와 에너지, 버그가 진짜 안 나온 날이 없네요 듀오의 장점 1.캐릭 꾸미기가 재밌음(이번에 월드컵 슈트 너무 귀여움) 2.오답고치기로 학습 능력이 up! 3.영어,채스 등 여러가지가 있어서 좋음 듀오의 단점 1.에너지 옛날에는 하트가 문제이더니 이번엔 더 심한 에너지 문제네요 리그 승급하는 사람들이 (다이아리그,펄리그 기준) 15000xp를 하는 분들이 계시 더라고요 슈퍼,맥스 안 쓰는 사람들이 1시간에 1번씩 들어오지 않는 이상 못 나오는 기록입니다.(그래서 그 분들이 나쁘다는 건 X) 2.버그 제가 듀오 하면서 발견한 버그가 40개가 넘는 것 같습니다. 먼저 채스를 처음 배우면 기물 움직이기를 배우는데 거기서…", "score": 3, "date": "2026-07-04", "thumbs_up_count": 7, "matched_categories": "가격/구독, 버그/오류, 스트릭/동기부여"}, {"review_text": "l am 이랑 l'm을 서로 다른 걸로 취급함. 실화임. +나는 스트리밍 서비스 가입 안 했는데 가입 왜 하나고 뭐라고 하면서 유료결제 하라면서 광고 띄움 +캐릭터가 너무 유치함. 정신 사나워 죽을 정도임. 자연스럽게 집중 안 됨.", "score": 1, "date": "2026-06-26", "thumbs_up_count": 6, "matched_categories": "가격/구독, 광고"}, {"review_text": "표정이 많이 불쾌하고, 저녁에 레슨하면 호들갑을 떨고, 지문의 내용도 싸가지가 많이 없어 전체적으로 많이 불쾌합니다. 학습 내용도 말해보카나 스픽에 비해 떨어지고요.", "score": 1, "date": "2026-07-01", "thumbs_up_count": 6, "matched_categories": "고객지원"}, {"review_text": "검수를 안 하는 건가요? 언어 앱인데 문장을 틀리게 읽은채로 오디오가 나오거나 분리되면 안되는 단어가 분리되어있어요 일본어 성우 중 무슬림여자애 성우분은 일본어를 할 줄 모르는것같은데(그 분 스크립트만 계속 조사 틀림) 왜 쓰는건가요?", "score": 2, "date": "2026-07-07", "thumbs_up_count": 5, "matched_categories": "-"}, {"review_text": "잘못 눌러서 듣기 건너뛰기나 말하기 건너뛰기를 누르면 취소가 안 돼요. 취소를 하려면 레슨 자체를 나갔다가 다시 해야합니다. 한번 더 예/아니오로 물어보는 선택지가 있었으면 좋겠어요. 또한 앱 내 오류가 많아 날짜 갱신이 안 되기도 합니다. 오류를 고쳐줬으면 좋겠어요.", "score": 3, "date": "2026-06-23", "thumbs_up_count": 5, "matched_categories": "버그/오류"}, {"review_text": "이 앱을 사용중에 단어 클릭해서 듣고 맞추기 할 때 마다 자주 사운드가 사라지는 버그가 있는데 그게 걸리면 해당판 내내 아무 소리도 안 들리는데 전혀 안 고쳐줌 피드백을 지속적으로 보냈는데도", "score": 1, "date": "2026-07-05", "thumbs_up_count": 5, "matched_categories": "버그/오류, AI/튜터"}, {"review_text": "제발제발제발좀 일본어코스 영어버전 음성 안나는것좀 고처주세요 ai로 개1짓거리하지말고 사람써서 고처주세요 제발좀", "score": 1, "date": "2026-07-01", "thumbs_up_count": 5, "matched_categories": "AI/튜터"}, {"review_text": "오류가 너무 많아요. 유료 돈 내고 일본어 공부하고 있는데, 문자-소리 불일치, 의미단위로 안 띄어 읽고 단어 중간에 의미 없이 띄워 읽기, 조사가 아닌 단어의 일부인데 조사로 잘못 띄우기 등 오류가 너무 많습니다. 이 정도로 오류 투성이인 일본어 학습 앱은 처음.", "score": 1, "date": "2026-07-04", "thumbs_up_count": 4, "matched_categories": "가격/구독, 버그/오류"}, {"review_text": "메일로 자꾸 이상한 메세지 보냄.", "score": 1, "date": "2026-07-05", "thumbs_up_count": 4, "matched_categories": "-"}, {"review_text": "안녕하세요 듀오링고를무료로 50일은 간 유저입니다. 듀오링고가 장점도 있지만 단점도 있는데요. 장점은 무료로 배울수 있다는점, 재미있다는점 등등이 있는데요. 하지만 단점은, 알림이 너무 많이 온다는점, 앱아이콘이 너무 무섭다는점, 광고가 너무 많이 나온다는 점, 업데이트가 너무 자주된다는 점, 앱 아이템이 나오지 않는다는 점 등등이 있는데요.전 솔직히 비추? 까진 아니지만 깔아보시면 아실겁니다. 이러한 점 참고해서 고쳐주세요.🦉", "score": 3, "date": "2026-07-04", "thumbs_up_count": 4, "matched_categories": "광고, 스트릭/동기부여"}, {"review_text": "케릭터들이 너무 불친절 해요. 그리고 유료 버전을 사용했는데도 오류가 많고 음성은 잘 인식 되지 않을때가 대부분이에요. 돈을 내면은 최소한 음성인식이라도 제대로 해야하는거 아닌가요?", "score": 1, "date": "2026-07-04", "thumbs_up_count": 4, "matched_categories": "가격/구독, 버그/오류"}, {"review_text": "결제유도 결제되면 환불 불가 조심하세요 결제된게 아까워 쓰다가 짜증나서 지움", "score": 1, "date": "2026-07-01", "thumbs_up_count": 4, "matched_categories": "가격/구독, 고객지원"}, {"review_text": "듀오링고 월드컵은 좋으나 수트를 5일동안 안줘요 듀오링고는 줬다하고 버그도아니에요 듀오링고가 안줘요 사기쳐요 진짜 할필요가없어요 실제로 실전가면 아무말도 못해요", "score": 1, "date": "2026-07-03", "thumbs_up_count": 4, "matched_categories": "버그/오류"}, {"review_text": "발음으로 성공 못하는건 좀 고치던가 발음 잘하는법을 알려주던거 우야노 그거는", "score": 1, "date": "2026-07-01", "thumbs_up_count": 4, "matched_categories": "AI/튜터"}, {"review_text": "듀오링고 무서워요", "score": 1, "date": "2026-07-01", "thumbs_up_count": 4, "matched_categories": "-"}, {"review_text": "나는 왜 듀오컵 슈트를 안주는걸까? 다른 가족들은 다 주는데 나만 안보임 ㅡ ㅡ 앱을 재설치해도 똑같다 좌측상단쪽에 축구공모양의 아이콘이 있다는데 나는 안보인다 왜 나만 듀오컵 슈트 안주냐?", "score": 1, "date": "2026-07-03", "thumbs_up_count": 4, "matched_categories": "-"}, {"review_text": "아니 영어 공부할때 좋긴 한데 한국어로 해석하는 문제에서 똑같은 답을 써도 언제는 맞고 언제는 틀린게 말이 됨? 의미상으로도 문제 없고 할때마다 내가 한국인이 아니라 다른날라 사람이 된거같다 한국어로 해석하는 문제에서 항상 그래 보통 말 할때는 바꿔 쓰기도 하고 하는 문장들을 틀렸다고 하면서 듀오링고 내에서는 오타도 있고 그렇다고 한국어로 잘 나오는것도 아니야 앱 내에서 나오는 한국어들이 어색합니다.", "score": 2, "date": "2026-07-03", "thumbs_up_count": 4, "matched_categories": "-"}, {"review_text": "이거 오류인지 모르겠는데 음악 배울 때마다 중간에 멈춰요. 10번 한다고 치면 그 중 한 9번 정도 멈춤", "score": 1, "date": "2026-07-04", "thumbs_up_count": 4, "matched_categories": "버그/오류"}, {"review_text": "앱모양부터이상함 체스게임에서 오스카 겁나쓰레기임", "score": 1, "date": "2026-06-23", "thumbs_up_count": 4, "matched_categories": "-"}, {"review_text": "광고가 겁나많이 나옴", "score": 1, "date": "2026-06-28", "thumbs_up_count": 4, "matched_categories": "광고"}, {"review_text": "배우는 데에 도움이 되긴 합니다만 종종 문제가 이상하게 나옵니다. 한국어 제시문과 명사의 위치가 다르다던지, 알려준거랑 쌩판 다른 내용이 나온다던지요. 솔직히 말하자면 현질유도가 심하진 않아도 해야만 제 성능 발휘하는 수준입니다.", "score": 2, "date": "2026-06-27", "thumbs_up_count": 4, "matched_categories": "-"}, {"review_text": "너무 집착한다", "score": 1, "date": "2026-07-06", "thumbs_up_count": 4, "matched_categories": "-"}, {"review_text": "1년 결제하고 몇개월 사용좀 하다가 안하고있었는데 1년지나서 다시 1년 자동결제되고 환불해달라니까 환불은 안해주고 구독취소만 시켜놓네? 번호도없고 문의해도 답변도 없고 이딴식으로 주머니채웁니까?", "score": 1, "date": "2026-07-05", "thumbs_up_count": 4, "matched_categories": "가격/구독, 고객지원"}, {"review_text": "공부하고 싶은데 에너지가 없어서 공부를 못한다 그리고 돈이 천원밖에 없어서 무한에너지 못쓴다", "score": 3, "date": "2026-07-15", "thumbs_up_count": 3, "matched_categories": "스트릭/동기부여"}, {"review_text": "기권한거 아닌디 왜 튕겨놓고 기권했다고 페널티 먹임? ㅡㅡ", "score": 1, "date": "2026-07-07", "thumbs_up_count": 3, "matched_categories": "버그/오류"}, {"review_text": "이름이 앞에 나오고 인사가 뒤에 나온 문장의 번역에서 왜 도치를 해야만 정답처리가 되는거죠? \"하나데스 콘니치와\"는 번역해도 \"하나입니다. 안녕하세요.\" 도 말이 되는거고 일한번역에서 이걸 굳이 도치해서 번역해야할 당위성이 없어보이는데 왜 이게 반드시 \"안녕하세요 하나입니다.\" 라고 도치되어 번역되어야 정답처리를 하는지 이해가 안됩니다. 이걸 제가 80일동안 꼬박꼬박 저의 답변도 정답처리가 되어야합니다 버튼 처 눌러가면서 리포트를 해도 이게 고쳐지지 않는건 그 되도않는 리포트가 장식버튼이거나 리포트를 제대로 검토하지 않는거죠?", "score": 1, "date": "2026-07-07", "thumbs_up_count": 3, "matched_categories": "UX/사용성, 고객지원"}, {"review_text": "쉬부레 똑같이 발음했는데 못알아쳐먹음 매번 틀리다하면 내 발음이 이상하구나 하겠는데 어쩔땐 맞다하고 어쩔땐 틀리다하고 난 똑같이 말하고 있는데 진짜 이거 때문에 연속 정답이 몇 번이나 날라간건지", "score": 1, "date": "2026-07-07", "thumbs_up_count": 3, "matched_categories": "스트릭/동기부여, AI/튜터"}, {"review_text": "아니 왜 자꾸 맞았는데 틀렸다고 함?진심 개열받네 그리고 귓구녕이 좀 파라 ㅉ", "score": 1, "date": "2026-06-28", "thumbs_up_count": 3, "matched_categories": "-"}, {"review_text": "왜 xp 늘리기 도전을 할 때 최종 단계에 도달하기 전에 갑자기 1단계로 초기화시키는 현상이 매번 발생하나요? 9단계에 도달하기 전에 계속 1단계로 초기화 시켜서 진행할 수가 없습니다.", "score": 1, "date": "2026-06-28", "thumbs_up_count": 3, "matched_categories": "-"}, {"review_text": "지금 현재 돈을 내고 프랑스어를 배우고 있는 사람입니다. 단어를 잘 알려줘서 읽는 대에는 문제가 없이 수월합니다. 하지만 가끔 해석된 단어들이 문제가 있는 경우가 있고, 제일 큰 문제점은 프랑스어는 발음이 핵심인데 제대로 발음을 알려주지도 않고 따라하래서 따라했더니 어디가 어떻게 문제인지도 안알려주고 그냥 안똑같다고 해버리니 학습이 안됩니다. 가끔씩은 그냥 안되는거 같을때도 있어서 학습의 방해가 심합니다. 이런부분은 빠른시일내로 수정해주셨으면 합니다", "score": 2, "date": "2026-06-27", "thumbs_up_count": 3, "matched_categories": "AI/튜터"}, {"review_text": "앱 디자인이 역겨워서 쓰기 싫어짐 진짜 더럽고 불쾌함 이딴식으로 디자인하는 이유가 어플 삭제 유도인가요", "score": 1, "date": "2026-06-27", "thumbs_up_count": 3, "matched_categories": "-"}, {"review_text": "업데이트 하고 나서부터 버튼이 눌러지지 않아요. 해결해주세요.", "score": 1, "date": "2026-06-26", "thumbs_up_count": 3, "matched_categories": "UX/사용성"}, {"review_text": "1년째 하고 있습니다..얼굴 바뀌는것도 싫고, 리그 강등도 싫습니다. 이정도면 노현질러들은 1등하지말라는거 아닌가요???? 좋은리뷰 많지만 전 솔직히 비추합니다. 긴말 안 하겠습니다. 솔직히 전보다 나아졌는데 고칠점이 많네요..특히!!!! 알람 빨간색으로 오는거. 진짜 싫어요. 협박같아요. 재미없어서 많이 안해서 1년차인데,96일이네요. 다른 앱이 더 나은것 같네요..그리고,리그 1등한 사람 대부분이 음악,수학,체스네요.. 이게 딴나라어 배우는데지 이런 것들 하는 데인가요? 정떨어지네요. 100일 찍고,지우겠습니다. 하지않는게 좋을것 같고, 사람들이 점점 노력을 안하고,리그 승급시간만 10000xp씩 모으네요. 비추. 잘생각하고,까세요.", "score": 1, "date": "2026-06-26", "thumbs_up_count": 3, "matched_categories": "스트릭/동기부여"}, {"review_text": "다 좋은데 유료 결제를 해야지만 하고싶을때까지 할수가 있어서 아쉽고 그날 1시간 ~ 2시간 정도 하고 싶을때 계속해서 할수 있지가 않은게 너무 안좋음, 물론 돈이 없어서 결제를 안하는거긴 한데 유료는 또 유료만의 플러스 기능들을 만들고 무료 버전도 무한히 수업 받을수 있게 만들어 줬음 좋겠음 ㅠㅜ", "score": 3, "date": "2026-06-26", "thumbs_up_count": 3, "matched_categories": "가격/구독"}, {"review_text": "아니 뭐 시끄럽네 내가 며칠 좀 안했다고 부엉이 새끼가 미치고 울고불고 정신사납네", "score": 2, "date": "2026-07-01", "thumbs_up_count": 3, "matched_categories": "-"}, {"review_text": "오답 왜 고침? 100일 넘게 했는데 오답 고치는데 ㅇ시간 걸리는데 그냥 끝내면 되지 굳이 고쳐서 시간 날려야 되냐;; 삭제해라 sibal;;", "score": 1, "date": "2026-07-04", "thumbs_up_count": 3, "matched_categories": "-"}, {"review_text": "안녕하세요 듀오링고 유저인데 듀오링고 쓰다 보니 단점이 너무 많아서 4점에서 2점으로 깎았습니다 진짜 듀오링고 단점이랑 버그 그런 게 너무 많아요 일일 퀘스트 상자 제가 안 열었는데 열었다 나와요 심지어 그거 메가 레어템이라 진짜 너무 아깝고 어이없습니다 그리고 새 단어 배울 때 그 단어 뜻을 알려줘야지 그냥 단어 듣고 찍으라는게 너무 어이없습니다 맞힐 확률이 4분의 1이에요 그리고 듀오링고 체스 문제 풀 때 오스카가 쓸데없는 말을 너무 많이 해서 집중력이 너무 흐려져요 그리고 오스카랑 대결할 때도 진짜 걔가 쓸데없는 말을 너무 많이 해서 약오릅니다 체스가 언제부터 기선제압하는 게임이었나요 일본어 잘 배우고 있긴 한데 진짜 버그가 이것 말고도 너무 많습니다 꼭 참고해 주세요", "score": 2, "date": "2026-07-06", "thumbs_up_count": 3, "matched_categories": "버그/오류"}, {"review_text": "다 괜찮은데 중국어 공부 때 성조를 맞게 입력해도 틀리다고 하네요. 여러번 문의하고 피드백드려도 계속 안되고 건전지만 먹고.. 이걸로 묶여서 연속 학습도 끊겼네요. 빠른 시일 내에 수정 부탁드립니다.", "score": 2, "date": "2026-06-24", "thumbs_up_count": 3, "matched_categories": "스트릭/동기부여, AI/튜터, 고객지원"}, {"review_text": "아니 왜 렉걸려서 안넘어가냐고요...", "score": 1, "date": "2026-07-03", "thumbs_up_count": 3, "matched_categories": "버그/오류"}, {"review_text": "아니 녹음이 잘 안돼고 똑바로 발음해도 틀리면 공부가 아니라 화가나요! 녹음좀 제대로 하.... 아니다.", "score": 1, "date": "2026-06-28", "thumbs_up_count": 3, "matched_categories": "AI/튜터"}, {"review_text": "체스 중간에 나가는 거 오스카 때만이라도 패처리 하지 말아주세요.", "score": 1, "date": "2026-07-03", "thumbs_up_count": 3, "matched_categories": "-"}, {"review_text": "패밀리요금제로 지금 일본어를 집중적으로 하고 있는데 한국어 번역이 자연스럽지 않을 때가 있어요..2시입니라인데 무지개입니다..이런식으로 오류 번역도 나오고 ..한국어 조사는 명사 뒤에 붙어야 되는데 명사 앞에 붙어서 아버지가 방에 들어가신다..인데 아버지 방에 들어가신다..이런식으로 알려줘요..초보는 오류가 많을거 같아요..그걸 판단할 수 있으면 단어 외우기나 문장 외우기 좋습니다..게임처럼 퀘스트를 깨고 아이템을 얻는 재미도 있고요..디테일 약간 부족한게 흠.", "score": 3, "date": "2026-06-29", "thumbs_up_count": 3, "matched_categories": "버그/오류"}, {"review_text": "앱을 예전에 사용하다 도움이 안 되는것같아 삭제한지 오래됐는데, 앱스토어 들어올때마다 아이콘이 너무 혐오스럽습니다..", "score": 1, "date": "2026-06-29", "thumbs_up_count": 3, "matched_categories": "-"}, {"review_text": "별점 1점 주기도 아깝네. 영어 레슨은 맨날 진도가 바뀌니깐 뭐 배우는지도 몰라서 에너지는 다 날아가고 음악 레슨은 하나 틀리니깐 그냥 앱이 멈춰버리네 좀 잘 좀 만들어라 개발진들아.", "score": 1, "date": "2026-07-05", "thumbs_up_count": 3, "matched_categories": "버그/오류, 스트릭/동기부여"}, {"review_text": "아무런 승인없이 결제되서 13만원 날렸네요 심지어 환불도 안 해줍니다 2일 지났는데 심지어 로그아웃까지 됐네요", "score": 1, "date": "2026-07-04", "thumbs_up_count": 3, "matched_categories": "가격/구독, 고객지원"}, {"review_text": "Your music lesson freezes a lot. It's not even the grade you get paid for.", "score": 1, "date": "2026-07-04", "thumbs_up_count": 3, "matched_categories": "AI/튜터"}, {"review_text": "중국어 학습을 하고 있습니다. 하루에 조금씩 유용하게 학습하고 있습니다만, 발음을 입력하는 문제에서 성조를 입력하는 데 불편함이 있습니다. 영문 발음만 입력하는 것은 오답 처리가 되어 사전에서 성조를 검색해 단계를 넘어가야 합니다. 영문 발음 입력도 정답 처리를 하거나 앱 내에서 성조를 입력할 수 있는 방법을 지원해주세요. 진짜 성조 좀 어떻게 좀 해주세요. 평균 정답률을 목표로 제시하면서 정답률을 해치는 요소를 방치하는 건 말이 안된다고 생각합니다.", "score": 2, "date": "2026-06-24", "thumbs_up_count": 3, "matched_categories": "UX/사용성, AI/튜터"}, {"review_text": "아이콘이 너무너무 불쾌해서 신고까지 했어요. 내 눈에 안 띄었으면 좋겠음. 꺼져", "score": 1, "date": "2026-06-26", "thumbs_up_count": 3, "matched_categories": "-"}, {"review_text": "무료체험판 유도후 얼결에 결제가 되었는데 취소를 교묘하게 못하게 하네요..자려는데 결제가 되었다는 알림이와서 바로 취소하려는데 정말 미치겠네요..로그인 정보를 찾지도 못하게 해놨어요.", "score": 1, "date": "2026-06-25", "thumbs_up_count": 3, "matched_categories": "가격/구독, 스트릭/동기부여"}, {"review_text": "중국어 문제로 발음기호 적는거 내버리면 적을수가 없잖아요 yingwen 쳐도 정답으로 안쳐주고 영원히 문제에서 나갈 수가 없었어요. 인터넷에 검색해서 복붙에서 벗어나긴 했어요 제발 발음기호를 적는 문제유형을 삭제하시거나, 키보드를 지원해주세요 중국어 세션 진행하기가 어려워요", "score": 2, "date": "2026-06-24", "thumbs_up_count": 3, "matched_categories": "AI/튜터"}, {"review_text": "재미가 너무 없고 그리고또 계속 하라고 해서 무서움 ㄷㄷ", "score": 1, "date": "2026-06-24", "thumbs_up_count": 3, "matched_categories": "-"}, {"review_text": "무료 사용자는 에너지가 부족해서 레전드 레벨 클리어 못하고 중간에 끊기는데 이게 버그인지 아니면 설계인지", "score": 1, "date": "2026-07-06", "thumbs_up_count": 2, "matched_categories": "버그/오류, 스트릭/동기부여"}, {"review_text": "업데이트하니 일본어위에 영어가 너무거슬리고 오히려 일본어를 안보게되요ㅜ영어없애주세요", "score": 1, "date": "2026-07-07", "thumbs_up_count": 2, "matched_categories": "-"}, {"review_text": "부모님 이메일을 적은적이 없는데 갑자기 팔로우랑 리더보드 다 없어지더니 부모님 동의 받으라고..ㅋㅋ 아니 클릭했더니 메일 보냈다는데 제 메일에도 아무것도 없고 엄마 아빠 메일에도 아무것도 안오는데 뭐죠? 그냥 예전처럼 해주시면 안되나요ㅋ큐ㅠ", "score": 1, "date": "2026-07-15", "thumbs_up_count": 2, "matched_categories": "-"}, {"review_text": "알람이 늦게와유.....지금 소셜 기능 좀 키게 해주세요.........켜주시면 별점 5점으로 바꿀게여ㅎ", "score": 1, "date": "2026-06-23", "thumbs_up_count": 2, "matched_categories": "-"}, {"review_text": "무료지만 나름 괜찮습니다. 그러나 수많은 방법으로 유료 결제를 유도합니다. 결제함정에 빠지지 않도록 조심하세요. 그리고 문의는 매우 어렵습니다. 잘못됐다싶으면 이미 늦은 것입니다. 당신의 돈은 결코 돌아오지 않습니다.", "score": 2, "date": "2026-06-24", "thumbs_up_count": 2, "matched_categories": "가격/구독, UX/사용성, 고객지원"}, {"review_text": "상자 보상, 수트 보상이 단 1개도 안들어옴", "score": 1, "date": "2026-06-28", "thumbs_up_count": 2, "matched_categories": "-"}, {"review_text": "스텝8에서 말하기 테스트 하는데 씨(さん) 나오면 \"상\"이라고 몇번을 계속 말해도 인식을 못합니다. 폰에 대고 상!상!!삼!!!상!!! 상이든 삼이든 주구장창 말해도 자꾸 못 알아먹어요. 왜 이러는건지 짜증나 죽겠네요", "score": 3, "date": "2026-06-26", "thumbs_up_count": 2, "matched_categories": "-"}, {"review_text": "닉네임 작성이 않돼요TT", "score": 1, "date": "2026-07-06", "thumbs_up_count": 2, "matched_categories": "-"}, {"review_text": "앱 아이콘 변하는 기능 온오프 없나요.. 보기 싫어 죽겠네요..", "score": 1, "date": "2026-06-24", "thumbs_up_count": 2, "matched_categories": "-"}, {"review_text": "좋긴 한데, 좀 짜증나네", "score": 1, "date": "2026-06-24", "thumbs_up_count": 2, "matched_categories": "-"}, {"review_text": "한 챕터만하면 광고가쳐나와서 뭘할수가 없음", "score": 1, "date": "2026-06-25", "thumbs_up_count": 2, "matched_categories": "광고"}, {"review_text": "저는 왜 수트 이벤트 다 안뜨나요?", "score": 3, "date": "2026-06-28", "thumbs_up_count": 2, "matched_categories": "-"}, {"review_text": "듀오링고 말하기가 좀 짜증 나네요 그래서 별 3개 드립니다. 그리고 듀오링고에서 좀 틀리면 틀렸다고 하네요. 그리고 오류도 있고 왜 0일 인데 골드인 사람들도 있어요?이것 들말고 많이 있는데 1개만 말하겠습니다. 왜 에너지 수가 오류가 나면은 채워지지가 않나요? 이것 들을 다 고쳐주시면 감사하겠습니다.그리고 그냥 짜증나고 강등이 많이 돼요. 그리고 왜 집착해요? 그리고 어려워요!!!!!🤬🤬🤬🤬🤬🤬🤬🤬🤬🤬🤬🤬🤬🤬🤬🤬🤬🤬🤬🤬🤬🤬🤬🤬🤬 출석하기가 귀찮아요!", "score": 1, "date": "2026-06-28", "thumbs_up_count": 2, "matched_categories": "버그/오류, 스트릭/동기부여"}, {"review_text": "퀘스트를 완료하고 상자 보상을 받은 걸로 뜨는데 받은 건 없음 아니 뭔 오류임?? 분명 보상을 받았는데 안 받은 걸로 나옴 이걸 거면 퀘스트를 왜 함 보상도 못 받는데", "score": 2, "date": "2026-07-03", "thumbs_up_count": 2, "matched_categories": "버그/오류"}, {"review_text": "중국어 배우는 중인데요 이건 이미 중국어를 아는 사람이 복습용으로 쓰는 느낌이에요 단어랑 문법을 알려준 뒤에 문제를 풀게해야하는데 아무것도 안 알려주고 그냥 문제를 내요 그리고 제가 성조 입력을 어떻게 합니까 솔직히 병음 알파벳 맞으면 맞다고 해줘야죠", "score": 3, "date": "2026-06-29", "thumbs_up_count": 2, "matched_categories": "-"}, {"review_text": "제가 어제 시작해서 잘 모르는걸 수도 있는데 수업을 하다가 에너지가 부족해 450보석을 주고 25에너지를 샀는데 다음 문제로 넘어가니까 에너지가 0이 되더라구요 버그인건가요? + 11시59분에 레슨을 시작하고 12시에 끝냈는데 제 연속학습기록이 리셋되었어요. 12시까지는 좀 봐주세요ㅜㅜ", "score": 1, "date": "2026-06-26", "thumbs_up_count": 2, "matched_categories": "버그/오류, 스트릭/동기부여"}, {"review_text": "맞았는데 틀렸다고 하고 너무 싫음", "score": 1, "date": "2026-06-25", "thumbs_up_count": 2, "matched_categories": "-"}, {"review_text": "계속 하라고 요구하고,안 맞는 단어도 맞는다해서 좀 별로", "score": 1, "date": "2026-06-25", "thumbs_up_count": 2, "matched_categories": "-"}, {"review_text": "중국어 병음 문제 좀 없애주세요 어떻게 입력하라는 건지ㅋㅋ;; 도저히 못하겠네요 성조 입력 안 해도 상관없게 만들어 주든지", "score": 3, "date": "2026-06-28", "thumbs_up_count": 2, "matched_categories": "-"}, {"review_text": "고객센터 번호좀 알려주세요 무료사용땐 잘되다가 오히려 정기결제 10만원하고 나서 앱이 에러가 많이 납니다 환불해주시든 개선해 주시든 답변 주세요", "score": 1, "date": "2026-06-30", "thumbs_up_count": 2, "matched_categories": "가격/구독, 고객지원"}, {"review_text": "NOT GOOD", "score": 1, "date": "2026-06-30", "thumbs_up_count": 2, "matched_categories": "-"}, {"review_text": "배우는 언어의 알파벳을 어플 자체에서 입력할 수 있도록 변경해주십시오", "score": 1, "date": "2026-07-04", "thumbs_up_count": 2, "matched_categories": "-"}, {"review_text": "프랑스어 강습에서 왜 자꾸 사람이름이 질문인지 모르겠어요. 빈칸을 채워야하는데 빈칸이 자꾸 폴 리사 마리 이따구임.", "score": 3, "date": "2026-07-04", "thumbs_up_count": 2, "matched_categories": "-"}, {"review_text": "저는 듀오링고 일본어,체스,독일어,수학,음악 등 으로165일 했습니다 근데 점점 버그가 나더니 음표에 #과 플랫이 섞여서 잘 보이지도 않고 한번 틀리면 다음꺼로 넘어가지도 않고 너무 짜증나서 그 버그 좀 고쳐주셨으면 좋겠어요", "score": 2, "date": "2026-07-05", "thumbs_up_count": 2, "matched_categories": "버그/오류"}, {"review_text": "광고나오는건 괜찮은데 닫기 버튼이 없어 개열받음", "score": 1, "date": "2026-06-27", "thumbs_up_count": 2, "matched_categories": "광고, UX/사용성"}, {"review_text": "피드에 친구 아닌 사람 뜨지 않도록 해주세요", "score": 1, "date": "2026-06-26", "thumbs_up_count": 2, "matched_categories": "-"}, {"review_text": "26일날 갑자기 듀오링고에 10만원이 빠져나가는데 애초에 슈퍼 산다고 혜택이 그렇게 좋은것도 아닌데 직접 산것도 아니고 걍 지혼자서 듀오링고로 빠져나갔는데 이거 수습 어케 할거임 점심 먹어야 하는데 오늘 편의점 가서 먹어야함;;", "score": 1, "date": "2026-06-27", "thumbs_up_count": 2, "matched_categories": "가격/구독"}, {"review_text": "업데이트했도 계속 이벤트에서 누락돼요", "score": 3, "date": "2026-06-27", "thumbs_up_count": 2, "matched_categories": "-"}, {"review_text": "앱 로고 너무 자꾸 바뀌고 여름에 역겨운 로고로 바뀌곤 쭉 유지 했었어서 삭제했었고 영어 '공부'에 집중되지 않은 앱이었음", "score": 1, "date": "2026-06-28", "thumbs_up_count": 2, "matched_categories": "-"}, {"review_text": "쓰기연습을 많이 하면좋겠어요", "score": 3, "date": "2026-07-06", "thumbs_up_count": 1, "matched_categories": "-"}, {"review_text": "과대망상,피해망상,정신병자,ADHD,자폐 오스카", "score": 1, "date": "2026-07-20", "thumbs_up_count": 1, "matched_categories": "-"}, {"review_text": "한국어 사용자는 베트남어 공부가 없어요 다른 외국어 사용자에는 있어요 ㅠㅠ 베트남어 만들어 주세요", "score": 1, "date": "2026-07-07", "thumbs_up_count": 1, "matched_categories": "-"}, {"review_text": "이게 단어랑 그림을 같이 주니까 그림만 보고도 맞출 수 있어서 전혀 도움 안됨.", "score": 1, "date": "2026-06-24", "thumbs_up_count": 1, "matched_categories": "-"}, {"review_text": "듀링아 언어학습어플에 프라이드같은거 묻히지마라", "score": 1, "date": "2026-06-26", "thumbs_up_count": 1, "matched_categories": "-"}, {"review_text": "재미없음", "score": 1, "date": "2026-06-27", "thumbs_up_count": 1, "matched_categories": "스트릭/동기부여"}, {"review_text": "이 앱만 켜면 폰이 뜨거워집니다. 왜이런지 빨리 오류 수정해주세요", "score": 1, "date": "2026-07-06", "thumbs_up_count": 1, "matched_categories": "버그/오류"}, {"review_text": "음악수업 악보즘 제대로 그려 넣어주세요 칸에 제대로 들어가지도 않은 악보네요 시작과 끝이 같길 바래요. 갈수록 실망", "score": 2, "date": "2026-07-03", "thumbs_up_count": 1, "matched_categories": "-"}, {"review_text": "아니 재밌고 잘 익힐수있게는 해주는데 집착이 너무 심해요..막 하루 안했다고 완전 무섭게 집착하고..너무 싫어요 집착만 안했으면..👎 그래도 공부자체는 너무 잘 도와줍니다!!", "score": 3, "date": "2026-06-25", "thumbs_up_count": 1, "matched_categories": "-"}, {"review_text": "너무 easy", "score": 1, "date": "2026-06-24", "thumbs_up_count": 1, "matched_categories": "-"}, {"review_text": "최악 비번을 잃어버리면 다시는 들어갈수 없는 묘한 시스템 레벨테스트전에 로그인이 먼저여야하는거같은데 사람 짜증나게 설계됨", "score": 1, "date": "2026-06-28", "thumbs_up_count": 1, "matched_categories": "-"}, {"review_text": "저희 어머니가 베트남인 이라서 베트남어 배우고 싶어서 깔았는데 한국어 쪽에 베트남어가 없드라구요 그래서 아쉬웠습니다. 그래도 모든게 다 좋습니다!", "score": 3, "date": "2026-07-03", "thumbs_up_count": 1, "matched_categories": "-"}, {"review_text": "처음에 퀘스트 하나 하면 연속학습일뜨고 다음으로 넘어가는 버튼이 사라져서 영원히 거기에 머물러있거나 앱 나가서 다시 연속학습 띄워야 다음으로 넘어가지더라고요ㅠㅠ 좀 불편해요...", "score": 3, "date": "2026-07-04", "thumbs_up_count": 1, "matched_categories": "UX/사용성, 스트릭/동기부여"}, {"review_text": "듀오링고 일본어하고 있는데 처음엔 너무 재밌고 실력이 늘어나는 재미에 180일가량 빼먹지않고 했는데요. 유료사용중입니다. 요새 업데이트되면 몇가지 시스템에서 버그가 발생되서 화가납니다.!!!!! 우선 단어 발음이 정확하지 않아도 그냥 정답처리가 됩니다. 비슷하지 않아도 정답처리됨. 한국어로 답해도 정답임 그리고 오늘 화가난건 글을보고 단어를 순서대로 놓는거에서 단어가 6개라면 5개 올리고 마지막 단어 선택하면 단어가 선택되어 올라가지않음.. 그래서 계속틀리다하고 한 카테고리가 끝나지 않아서 오늘은 그만함 근데 내일되면 또 똑같이 안될꺼임. 게임상 중간에 그만두면 똑같은 문제로 처음부터 다시하니까.. 지금 내가 똑같은 문제로 세번했는데 도저히 다음으로 넘어갈수가 없음 게다가 어제 미션해서 X3 이 30분…", "score": 1, "date": "2026-07-04", "thumbs_up_count": 1, "matched_categories": "가격/구독, 버그/오류, 학습효과, 스트릭/동기부여, AI/튜터"}, {"review_text": "저는 일본어,채스,음악 을 배우는 장재이 입니다. 이 앱은 배우는 건 좋은데 가끔 오류 가 생기는게 좀......그렇습니다.😔 이상.(*^^*)", "score": 3, "date": "2026-07-05", "thumbs_up_count": 1, "matched_categories": "버그/오류"}, {"review_text": "대전할때에 인식률이 너무 안좋아서 5번 눌러도 다른 칸으로 옮겨지는데요?", "score": 3, "date": "2026-07-05", "thumbs_up_count": 1, "matched_categories": "-"}, {"review_text": "문제제기 피드백 0% 문장순서 파괴문제, 직독직해는 오답처리하는 융통성이라고는 없는 문제들 문제제기해도 피드백없이 그 다음레슨(일정기간지난 후 풀었을때) / 다음 차시 리마인드문제 내에서 고쳐지지않음", "score": 1, "date": "2026-07-05", "thumbs_up_count": 1, "matched_categories": "AI/튜터"}, {"review_text": "팔스타프 영통할때나 긴 단어는 알아먹고 짧은단어 말귀 못알아처먹을때 진짜 앱 지우고 싶음 맥스 돈 받아먹고 맞냐 이거", "score": 1, "date": "2026-07-05", "thumbs_up_count": 1, "matched_categories": "-"}, {"review_text": "체스 할때 상대 캐릭터안보이고 체스판만 화면 위쪽에 보이는 버그 좀 고쳐주세요. 가끔씩 버그나네요", "score": 1, "date": "2026-07-05", "thumbs_up_count": 1, "matched_categories": "버그/오류"}, {"review_text": "뭔가 퀘스트나 보상을 얻는 조건이 만족 됐지만 보상 받은거로 넘어가고.실제로는 보상을 주지 않습니다.그런데 보상은 주었다고 써있습니다.월드컵 맞아서 슈트 준비한건 좋은데 실제론 못받았는데 받았다고 떠서 2개의 슈트를 날렸습니다.오류 수정해주시면 좋은 앱 입니다", "score": 3, "date": "2026-07-03", "thumbs_up_count": 1, "matched_categories": "버그/오류"}, {"review_text": "에러가 정멀많아오", "score": 1, "date": "2026-07-03", "thumbs_up_count": 1, "matched_categories": "-"}, {"review_text": "버그가 있습니다. need 필요하다 need 필요해요 짝이 안맞다고 계속 틀림 알람으로 다음 step 으로 안넘어가고 있습니다.", "score": 1, "date": "2026-06-28", "thumbs_up_count": 1, "matched_categories": "버그/오류"}, {"review_text": "커스텀 이벤트 할 때마다 안뜸", "score": 1, "date": "2026-06-28", "thumbs_up_count": 1, "matched_categories": "-"}, {"review_text": "듀오링고야 나 3시까지 학교 5시까지 공부 7시까지 저녁밥 8시까지 게임인데 그래서 9시에해야돼 근데 핸드폰 반납시간은 8시 50분이야 5점줄려고했는데 그리고 채스만해도 연속학습돼는거 없에", "score": 3, "date": "2026-06-29", "thumbs_up_count": 1, "matched_categories": "스트릭/동기부여"}, {"review_text": "음악 레슨중에 하나라도 하나라도 틀리면 다음 레슨으로 넘어가지 않는 버그좀 고쳐주세요", "score": 1, "date": "2026-07-03", "thumbs_up_count": 1, "matched_categories": "버그/오류"}, {"review_text": "고객센터 연락처는 없나요? 패밀리요금제 사용중인데 오류가 있습니다. 피드백보내도 답이 없어요.", "score": 1, "date": "2026-07-01", "thumbs_up_count": 1, "matched_categories": "버그/오류, AI/튜터, 고객지원"}, {"review_text": "시간때울때 죄책감없이 때우거나 여행가기전에 괜히 설레서 연습하고 싶을때나 할듯 번역 어색한 부분이나 앞뒤문맥 없이 조사주고 매치시키라 하거나 한국어에는 없는 난생 처음보는 표현도 있었음.. 그리고 이 새 미친거 자꾸 접속안하면 집착해서 무서워서지움;", "score": 3, "date": "2026-06-29", "thumbs_up_count": 1, "matched_categories": "-"}, {"review_text": "일점", "score": 1, "date": "2026-06-26", "thumbs_up_count": 1, "matched_categories": "-"}, {"review_text": "영국식 영어 지원이 안 되는게 아쉬워요", "score": 3, "date": "2026-06-24", "thumbs_up_count": 1, "matched_categories": "-"}, {"review_text": "아 이 새끼들 2~3주 전에 메일로 보낸 문의도 답도 없고 맨날 앱 오류나 나고 짜증나네 진짜", "score": 3, "date": "2026-06-25", "thumbs_up_count": 1, "matched_categories": "버그/오류, 고객지원"}, {"review_text": "월드컵이벤트가 아예안뜨네요. 왜 안뜨는지 이해가안갑니다. 앱 재설치도 해보고 매일하고있는데 계속 안떠요. 똑같이시작한 제 지인(폰 갤럭시 같은기종임)은 벌써 유니폼 여러개모았는데 왜 저만안뜨는거죠?", "score": 3, "date": "2026-06-28", "thumbs_up_count": 1, "matched_categories": "-"}, {"review_text": "다 좋은데 단수, 복수 표기 좀 명확히 해주세요. 한글로는 단수인척 해놓고 계속 틀렸다고 하네요. 그리고 다른 어플은 AI 도입하는데 맥락이나 문법 맞으면 정답처리로 해주세요.", "score": 3, "date": "2026-06-24", "thumbs_up_count": 1, "matched_categories": "AI/튜터"}, {"review_text": "다 좋은데 발음 문제에서 될때까지 계속 시도하게 해줬음 좋겠음 3번정도 하고도 발음 틀리면 그냥 넘어가서 자신감이 떨어짐 나름 따라한다고 발음 하는데도 자꾸 틀리다 하니까 할맛이 안남 ------------ 그리고 이전 단원에서 배우지 않은 단어를 갑자기 문제로 출제하는 경우가 더러 있는데 이제 막 배우는 초보자 입장에서 쌩뚱맞은 뜻도 모르는 단어가 나오니까 난이도가 와리가리 한것 같습니다. 특히 스토리 단원에서요 영어 원문과 한국어 해석 없이 원어민이 리스닝해주는 스테이지에서는 그저 감으로 찍어서 맞춰야 합니다.", "score": 3, "date": "2026-06-25", "thumbs_up_count": 1, "matched_categories": "AI/튜터"}, {"review_text": "음성 인식이 잘 안 될 때가 있어요ㅜ", "score": 1, "date": "2026-06-24", "thumbs_up_count": 1, "matched_categories": "-"}, {"review_text": "귀요미", "score": 3, "date": "2026-07-06", "thumbs_up_count": 0, "matched_categories": "-"}, {"review_text": "대체 언제까지 차만 마시나요?? 처음. 재밌음. 글자쓰기 할때. 난 가볍게 배우고 싶은데 이것까지 알아야해? 또다시 반복. 아. 지겨워서 하기 싫다.", "score": 2, "date": "2026-07-06", "thumbs_up_count": 0, "matched_categories": "-"}, {"review_text": "음성인식 개선 필요 현지인이 말해도 못알아 듣는건 좀....", "score": 3, "date": "2026-07-06", "thumbs_up_count": 0, "matched_categories": "-"}, {"review_text": "업적을 따야되는데 업적이 안들어 와요..ㅠㅠㅠㅠㅠ", "score": 3, "date": "2026-07-05", "thumbs_up_count": 0, "matched_categories": "-"}, {"review_text": "음악 섹션 3 유닛 23 부터 학습 중 안 넘어가서 진행을 못합니다.", "score": 2, "date": "2026-07-05", "thumbs_up_count": 0, "matched_categories": "-"}, {"review_text": "너무 잘주 버그가 대요", "score": 2, "date": "2026-07-05", "thumbs_up_count": 0, "matched_categories": "버그/오류"}, {"review_text": "체스 대전을 해도 기보를 볼수없음...분석이 불가능.. 그리고 초반 퍼즐들은 상대가 절대 움직이지 않을 방식으로만 알려줌..블런더만 하는 상대를 예시로 드니 오히려 헷갈림..", "score": 2, "date": "2026-07-04", "thumbs_up_count": 0, "matched_categories": "UX/사용성"}, {"review_text": "때로 오류가 나서 하다가 먹통이 돼요. 특히 음악수업에서 자주 그래서 어플을 끄고 그 레슨을 처음부터 반복해야하는게 넘 불편해요", "score": 3, "date": "2026-07-05", "thumbs_up_count": 0, "matched_categories": "버그/오류, UX/사용성"}, {"review_text": "버그가 많음", "score": 1, "date": "2026-07-05", "thumbs_up_count": 0, "matched_categories": "버그/오류"}, {"review_text": "공부하긴 좋은데 중국어 공부중인데 ă이게 구부러진거때문 정답처리도 안되고 지금 몇주째 넘어가질않고 성질나요 그리고 발음이 정확하지않아도 넘어가는데 발음교정되는게 있음 좋겠어요", "score": 3, "date": "2026-07-02", "thumbs_up_count": 0, "matched_categories": "AI/튜터"}, {"review_text": "아니 언제는 렉이 걸려요", "score": 2, "date": "2026-06-27", "thumbs_up_count": 0, "matched_categories": "버그/오류"}, {"review_text": "정말이지 음악 학습의 싱크는 엉망이군요 조절할 수도 없고 판정 진짜.. 이건 아닙니다.", "score": 2, "date": "2026-06-26", "thumbs_up_count": 0, "matched_categories": "-"}, {"review_text": "음악이 답답하다", "score": 2, "date": "2026-06-26", "thumbs_up_count": 0, "matched_categories": "-"}, {"review_text": "예쁜 슈트 나오면 항상 제 아이폰만 안되고 가끔은 레슨 중간에 혼자 나가버려요", "score": 1, "date": "2026-06-28", "thumbs_up_count": 0, "matched_categories": "-"}, {"review_text": "앱 이이콘보소", "score": 3, "date": "2026-06-28", "thumbs_up_count": 0, "matched_categories": "-"}, {"review_text": "쫌 지루한것도 있고.. 아 근데 왜 저만 동물 슈트나 축구 유니폼은 레슨은 아무리 해도 안줘요?!?! 근데 또 업데이트 하기는 없고...ㅠㅠ", "score": 3, "date": "2026-06-28", "thumbs_up_count": 0, "matched_categories": "스트릭/동기부여"}, {"review_text": "아니 하루에 하나할 에너지는 주어야져......", "score": 3, "date": "2026-06-28", "thumbs_up_count": 0, "matched_categories": "스트릭/동기부여"}, {"review_text": "집착광", "score": 2, "date": "2026-06-26", "thumbs_up_count": 0, "matched_categories": "-"}, {"review_text": "조금 이상한말을 해서 무서움", "score": 1, "date": "2026-06-24", "thumbs_up_count": 0, "matched_categories": "-"}, {"review_text": "꾸준하게 할수있는고 짧게 말하기 듣기까지 가능한건 장점이지만 어학교제보다 깊이있는 공부가 어렵고 번역기의 발번역수준의 문제가 자주 등장하다보니 짜게 식어서 한달써보고 지웠어요(일본어)", "score": 2, "date": "2026-06-25", "thumbs_up_count": 0, "matched_categories": "UX/사용성"}, {"review_text": "아직 시간 많이 남았는데 듀오 얼굴 일그러지는거 보이면 하기 싫어짐", "score": 3, "date": "2026-06-25", "thumbs_up_count": 0, "matched_categories": "-"}, {"review_text": "일본어는 회화만해서좋은데 영어는 왜 꼭 필기를 강요하죠? 마치 중학교로 돌아간느낌이고. 가볍게 회화하려 시작한건데 필기하는단계 없애는방법이요?", "score": 3, "date": "2026-06-25", "thumbs_up_count": 0, "matched_categories": "-"}, {"review_text": "쉽고 재밋어요", "score": 3, "date": "2026-06-25", "thumbs_up_count": 0, "matched_categories": "-"}, {"review_text": "체스하는 AI가 말하는게 너무 짜증나고,순위결승전좀 없애주시면 안되요?별로.", "score": 1, "date": "2026-06-24", "thumbs_up_count": 0, "matched_categories": "AI/튜터"}, {"review_text": "체스와수학이 안되요", "score": 3, "date": "2026-06-23", "thumbs_up_count": 0, "matched_categories": "-"}],   defaultN: 3 },
+    speak: { complaints: [{"review_text": "다시 리뷰 할게요 특정 단어 하나만 못 알아듣는 게 아니라 랜덤으로 인식이 안 되는 거였네요 앞에선 잘 얘기한 단어를 뒤에서 다시 말할 땐 갑자기 인식이 안 됩니다. 이게 무료 앱이었으면 저도 그냥 넘어갔을 겁니다. 근데 아니잖아요. 저 스픽을 이제 일주일밖에 안 썼습니다. 스피킹 위주로 공부하는 앱이 음성인식에 문제가 있는 게 말이 된다고 생각합니까? 다른 후기들 보면 이미 작년부터 음성인식 문제가 있었는데 아직도 고쳐진 게 없네요. 스픽 광고로 홍보는 엄청 하잖아요. 저도 광고 통해서 이용하게 된 건데 솔직히 이러면 스픽은 내부 문제에는 하나도 관심이 없구나라고 생각할 수밖에 없지 않겠어요? 저는 다른 영어공부 앱 찾으면 그냥 해지할 겁니다.", "score": 1, "date": "2026-03-13", "thumbs_up_count": 26, "matched_categories": "광고"}, {"review_text": "요즘 유사 어플이 얼마나 많은데, 무슨 한탕 장사하고 접을 생각으로 운영하시나요? 일단 예고 된 갱신 일보다 하루 전에 선결제 되는 어플은 살면서 처음보고요.(하루전에 결제 될거란 고지를 해주는것도 아니고 무려 하루 전에 먼저 결제부터 해버림 ㅋㅋㅋ) 결제가 됐으면 어떤식으로든 영수증을 보내줘야지 돈이 허공에서 없어진 것도 아니고 돈은 빠져나갔는데, 그 어떤 수단으로도 영수증 확인은 안되고 구글 내역에서 환불 조차 할수 없습니다~ 네 스픽 자체 내에서 환불을 하려고 하니 영수증 상에 주문번호가 없으면 안된다네요^^ 영수증을 안줬는데 영수증 상에 번호가 없으면 진행 자체가 안된답니다~~ 네네 결제 예정일보다 하루 전에 그냥 주머니에서 돈 꺼내가 놓고 아무런 알림도, 고객이 다시 돌려받을 수단도 아무것도…", "score": 1, "date": "2026-03-12", "thumbs_up_count": 22, "matched_categories": "가격/구독, 스트릭/동기부여, 고객지원"}, {"review_text": "저는 1년 넘게 프리토킹을 사용했습니다. 스픽에서 프로그램 업그레이드를 하고 있는것 같은데 최근들어 일주일 전후 (26.3)에 답변을 할때 녹음버튼을 누르고 말을 하는것으로 바뀐것 같습니다. 문제점은 1. 길게 대답하면 반응없음 2. 길게 대답하면 완전히 다른 한 문장으로 대체 어떻게해야 이전처럼 사용할 수있나요? 빠른 대답 부탁드립니다. 1년치 재결제했는데 이렇게는 사용 불가할듯 합니다.", "score": 1, "date": "2026-03-19", "thumbs_up_count": 21, "matched_categories": "가격/구독, UX/사용성, 고객지원"}, {"review_text": "음성 인식 좀 고칩시다, ai고 뭐고 인식을 이상하게 하는데 뭔 대화를 해요 내가 이상한건가 해서 다른 어플로 인식을 해보면 잘 되는데 스픽에서만 인식이 이상하네요 그리고 코스 중 튜터 Q&A 에서 가끔씩 튕기는데 너무 짜증나네요 연간 구독권 끝었는데 중간에 환불도 어렵게 해서 그냥 씁니다, 이 부분에서는 장사 참 잘하네", "score": 1, "date": "2026-03-25", "thumbs_up_count": 20, "matched_categories": "가격/구독, UX/사용성, AI/튜터, 고객지원"}, {"review_text": "답답해서 화병걸립니다. 인식속도도 느려터져서 여러번 반복해서 얘기해야할때가 많고, 특정 단어는 아무리 여러번 정확히 발음해도 절대로 인식되지 않는 경우가 너무 잦습니다. 성격 나빠지는 영어공부앱 1위.", "score": 1, "date": "2026-04-17", "thumbs_up_count": 17, "matched_categories": "AI/튜터"}, {"review_text": "무료구간이 너무 짧아서 결제해서 하루 써보고 나중에 다시 쓰려고 구독취소 해뒀는데, 카드 환불 기다리고있는데 4일이나지나도 안되길래 보니까 멤버쉽 유지되어있어서 환불 처리는 안된 것 알게됨 앱 내부에 링크나 버튼도 없고 내가 찾아서 구글플레이로 폼 따로 입력해서 환불요청을 보내야하는게 다크패턴같이 느껴져서 환불받고나면 사용안하고자 함", "score": 1, "date": "2026-04-06", "thumbs_up_count": 15, "matched_categories": "가격/구독, UX/사용성, 고객지원"}, {"review_text": "소리 작게 듣고싶은데 왜 맘대로 볼륨이 크게 나오는지 모르겠어요. 너무 불편해요. 보관한 문장 복습 시에는 더이상 복습이 필요치않다고 생각될 시 보관취소를 바로 할 수 있게 개선되면 좋겠습니다. 빠르게 말하면 음성인식률 너무 떨어져요. 긴 문장을 보관하면 로딩이 걸려 복습할수 없게 오류가 납니다.", "score": 2, "date": "2026-05-07", "thumbs_up_count": 14, "matched_categories": "버그/오류, UX/사용성"}, {"review_text": "처음 한동안 아주 좋다고 생각했어요...그런데 학습 시간이 늘고 실력이 조금 는다 싶어도 학습영상갯수가 늘 그대로. 스피킹 연습할 영상갯수가 너무 없는듯. 앱의 목적이 스터디인지 광고인지. .늘 변함없이 제자리인지라 다른 앱찾아 간다요. 광고는 어마어마하게 하고..유명인만 쓰던데.", "score": 1, "date": "2026-03-19", "thumbs_up_count": 11, "matched_categories": "광고, 학습효과"}, {"review_text": "꽤나 유용하게 잘 사용하고 있었습니다. 내가 말한걸 잘 인식해서 프리토킹 연습이 잘 되었는데 며칠 전부터 음성 인식이 잘 안되네요 내가 말한거랑 전혀 관련 없는게 나오고 길게 말하면 거의 못알아듣고 대화 티키타카가 전햐 되지를 않으니 진도도 못나가요 앱 이름값 한다고 생각하고 열심히 스피킹 연습 하다가 지금은 타자치면서 대화 연습중이에요 그럴거면 ai 채팅으로 영어공부하는게 더 쌀듯요 빨리 이 문제를 개선했음 좋겠어요", "score": 2, "date": "2026-03-23", "thumbs_up_count": 10, "matched_categories": "AI/튜터"}, {"review_text": "내가한 말이랑 전혀 쌩뚱맞는 문장이 가끔 만들어 집니다..... 단어 하나 하나가 다르면 내 발음이 이상하구나 싶겠습니다만 그냥 아예 다른문장이 출력돼요 이게 맞아요? 다시 말하기로 몇번을 말해도 뭐 아예 다른 문장이 계속 생성되는데요.... 그리고 길게 이야기하면 뭐 뒤에 말만 조금 나오고... 문제 투성이인듯", "score": 1, "date": "2026-05-10", "thumbs_up_count": 10, "matched_categories": "AI/튜터"}, {"review_text": "특정 발음 인식을 못 합니다. 그래서 진도를 나가는데 시간을 많이 잡아먹습니다. 다른 리뷰들도 가만히 살펴보니 특정 시점 업데이트 이후 이런 현상이 잦은것 같은데 혹시 구조조정 등의 이유로 해당 기술민을 인수인계없이 해고하는 과정에서 이런 사태가 계속 방치되는건 아닌지 의구심이 듭니다.", "score": 1, "date": "2026-06-21", "thumbs_up_count": 8, "matched_categories": "AI/튜터"}, {"review_text": "진짜 프리토킹 너무너무 유용해서 정말 잘 쓰고 있는데 이번에 업데이트 된 이후로 인식률도 정말 안 좋아졌고, 다시 말하기도 힘들어지고, 마지막으로 상대가 한 말이 바로 지나가 버려서 해석을 보거나 다시 볼 수 없는게 사용자 입장에서 정말정말 불편합니다. 부디 제발 롤백이나 개선 부탁드립니다..", "score": 3, "date": "2026-03-30", "thumbs_up_count": 7, "matched_categories": "UX/사용성"}, {"review_text": "프리미엄 연간 이용권을 월 10750원에 구매하였고 지난 1월에 기간이 만료되었음에도 계속 돈이 인출되고 있습니다. 구독취소는 진즉에 했으나 카드사에서도 어쩔 수가 없다고 해당 콘텐츠에 문의하라고 하나 전화 통화를 하면 기계음에 상담사 연결같은 목록은 없고 해당사항이 없는 목록만 계속해서 이야기 해 줍니다 빠른 답변 바랍니다", "score": 1, "date": "2026-04-12", "thumbs_up_count": 4, "matched_categories": "가격/구독, 고객지원"}, {"review_text": "너무 비싸요 ㅜ 이거 할 바에는 듀오링고 맥스 끊지.. 1년 플랜 기준 10~20배 차이나는데 + 덤으로 다단계같은 수익구조(스픽파트너) 개선 좀 해주세요 추천코드 입력하면 2만원 즉시 지급같은..; 그런 광고비용 대신 어플 개선과 소비자를 위해 힘쓰는게 좋을 것 같아요 실사용리뷰 보려고 검색하면 유튜브, 블로그, 커뮤니티 할 것 없이 다 커미션 받으려고 추천코드 도배하는 것 밖에 없고.. 전체적으로 어플이 바이럴티가 너무 나요", "score": 2, "date": "2026-07-14", "thumbs_up_count": 3, "matched_categories": "가격/구독, 광고"}, {"review_text": "26.6.16 기준 무슨 업데이트를 최근 했길래 어색한 ai 음성에 자동으로 뒤로 넘어가고 불편하네요. 충분히 연습하고 뒤로 넘기는 편인데 조급하게 하게 만드는 듯. ai 음성은 정말 적응안됨. 실제 느낌이 전혀 나지 않음", "score": 3, "date": "2026-06-16", "thumbs_up_count": 3, "matched_categories": "UX/사용성, AI/튜터"}, {"review_text": "무료 트라이얼 일주일이라고 해놓고 카드 정보 넣으라고 해놓고 안내 후 취소하면 된다고 하더니 안내도 없고 일주일도 안지났는데 1년 결제를 해버리네요.. 환불 요청했는데 답도 없고 어디에 연락을 해야되는지도 모릅니다. 환불 진행 어떻게 할 수 있나요?", "score": 2, "date": "2026-06-22", "thumbs_up_count": 2, "matched_categories": "가격/구독, 고객지원"}, {"review_text": "스픽의 핵심 기능은 프리톡이라고 생각해요. 그런데 최근에 제가 하는 말을 하나도 못 알아듣고 이상하게 나오더라구요. 분명히 영어로 이것저것 말 했는데 말 했다고 나오는 부분에서는 Yes, yes 이렇게 나온다던가 하는 경우 때문에 연습하기도 싫어지네요... ㅠ", "score": 2, "date": "2026-03-21", "thumbs_up_count": 2, "matched_categories": "-"}, {"review_text": "한달 짜리 결제 해서 공부중 입니다 토익은 처음이구요 문제가 너무 어렵고, 설명도 불친절 합니다 초보들이 혼자 독학하기엔 도움이 안되는거 같습니다 한달짜리 결제 했는데 너무 돈아깝고, 수준에 맞는 문제가 아니라 계속 어렵습니다 결제 비추 드립니다", "score": 1, "date": "2026-03-24", "thumbs_up_count": 2, "matched_categories": "가격/구독, UX/사용성"}, {"review_text": "느그들이 광고에서 망하는 부엉이랑 시간 낭비하기가 더 나을듯 다른 앱을 왜 욕하냐;", "score": 1, "date": "2026-07-09", "thumbs_up_count": 1, "matched_categories": "광고"}, {"review_text": "기초를 위한 패턴연습량은 무척 많음. 기능이 추가되어 모르는 부분 바로 묻기에 최적화됨. 간단한 회화 연습은 좋지만 심화는 안됨. 더 대화를 길게 하고 싶은데 그냥 끊어버림. 진짜 회화의 느낌은 아님. 초급에 매우 유용.", "score": 3, "date": "2026-07-12", "thumbs_up_count": 1, "matched_categories": "-"}, {"review_text": "프리이엄 플러스 이용자입니다. 앱을 실행할때마다 프리톡을 하려고 하면 실행이 안되고 멈춥니다. 앱을 나갔다 들어와도 동일해요. 그리고 겨우 된다고 해도 한번 끝나고 다른 토픽의 프리톡을 하려고 하면 또 렉 먹고 멈춰요", "score": 3, "date": "2026-07-09", "thumbs_up_count": 1, "matched_categories": "버그/오류"}, {"review_text": "2년전에 쓰다가 구독취소하고 삭제 했는데 작년에도 결제가 나가고 올해도 나갔네요. 구독취소해도 자동결제되는 시스템인가", "score": 1, "date": "2026-07-06", "thumbs_up_count": 1, "matched_categories": "가격/구독"}, {"review_text": "노트북으로 스피 앱을 사용하려고 했는데 녹스다운 받고 구글에 로긴하고 했는데 기기호환안된다니..실망입니다.", "score": 1, "date": "2026-04-24", "thumbs_up_count": 1, "matched_categories": "-"}, {"review_text": "잘못 결제 눌러서 구글이랑 스픽 내부에서도 환불 신청 했는데 안돼요 당일날 바로 아무것도 이용 안하고 요청했는데요", "score": 1, "date": "2026-04-28", "thumbs_up_count": 1, "matched_categories": "가격/구독, 고객지원"}, {"review_text": "퀄리티 낮은 광고로 대형앱 까고있네ㅋㅋ", "score": 1, "date": "2026-07-09", "thumbs_up_count": 1, "matched_categories": "광고"}, {"review_text": "회원권 트릭있어요 연간구독이라 중도 해지 안되네요ㅡㅡ 연간 할부 개념이네요 몇주하다가 시간안되서 취소하려니까 안되요 4달째 쌩돈 내는중 지금 6월 내년 2월까지 쌩돈 그냥 내야하는중", "score": 1, "date": "2026-06-10", "thumbs_up_count": 1, "matched_categories": "가격/구독"}, {"review_text": "비정상적으로 앱이 종료돼서 진도가 사라져요. 한두번이 아니에요 갤럭시 s26이고 안정적인 와이파이 데이터 환경에서도 그러네요", "score": 1, "date": "2026-06-08", "thumbs_up_count": 1, "matched_categories": "-"}, {"review_text": "광고에는 환불 쉽다해놓고 환뷸 안됨", "score": 2, "date": "2026-07-07", "thumbs_up_count": 1, "matched_categories": "광고, 고객지원"}, {"review_text": "개선이 없음 마이크인식이나 쉬운단어도 이상하게 인식해서 공부하는건지 스트레스 받게할려는건지 점점 하기싫어짐", "score": 1, "date": "2026-03-25", "thumbs_up_count": 1, "matched_categories": "-"}, {"review_text": "ai대화할때 제 말에 피드백을 주는건 좋은데 대화를 잠시 멈출 수 있으면 좋겠어요... 피드백 읽고 싶은데 대화는 계속되니까 오히려 둘다 못하게 되네요...", "score": 3, "date": "2026-03-12", "thumbs_up_count": 1, "matched_categories": "AI/튜터"}, {"review_text": "앱 내 고객센터가 기능을 아예 안 하나요? 문의 하려면 어플 내에서만 하게 해놨으면서 답도 안 하면 어떡합니까..", "score": 1, "date": "2026-04-13", "thumbs_up_count": 1, "matched_categories": "고객지원"}, {"review_text": "영수증이 발급이 안됐는데 환불요청은 어디서하나요.. 연간결제를 이렇게 자동으로 하시다니... 최악", "score": 1, "date": "2026-04-27", "thumbs_up_count": 1, "matched_categories": "가격/구독, 고객지원"}, {"review_text": "그냥 말도 안되는 양아치앱", "score": 1, "date": "2026-06-30", "thumbs_up_count": 0, "matched_categories": "-"}, {"review_text": "주관식응답시 멈춤 오류로 자동으로 메인 강의로 나가집니다", "score": 3, "date": "2026-06-28", "thumbs_up_count": 0, "matched_categories": "버그/오류"}, {"review_text": "작년에 프리미엄 1년 결제했는데 오늘 더 비싼 프리미엄플러스로 자동 결제가 됨.. 항의하려해도 구조상 전화 불가능하고 채팅도 AI봇이 응대.. 환불은 받았는데 겁나 짜증남 이런회사는 망해야 됨", "score": 1, "date": "2026-06-29", "thumbs_up_count": 0, "matched_categories": "가격/구독, AI/튜터, 고객지원"}, {"review_text": "free talk 에서 자꾸앱이 죽습니다. 업데이트이후에그런것같습니다.", "score": 1, "date": "2026-06-29", "thumbs_up_count": 0, "matched_categories": "-"}, {"review_text": "20만원 환불 못받은지 1년되감", "score": 1, "date": "2026-06-30", "thumbs_up_count": 0, "matched_categories": "고객지원"}, {"review_text": "튜터 Q&A등 일부가 자주 재생이 안됩니다. 무슨 문제가 있나요?", "score": 3, "date": "2026-07-02", "thumbs_up_count": 0, "matched_categories": "AI/튜터"}, {"review_text": "발음인식 개선 아직도 안됐나요? 보통 열받는 문제가 아님", "score": 2, "date": "2026-07-05", "thumbs_up_count": 0, "matched_categories": "AI/튜터"}, {"review_text": "일본어 되는줄알앗는데 안되네요. 환불해주세요.", "score": 3, "date": "2026-07-07", "thumbs_up_count": 0, "matched_categories": "고객지원"}, {"review_text": "어이없을정도로 ai가 영어를 잘못 알아들음 talk to you를 어떻게 do you wanna eat spaggetti 로 듣는건지 신기함... 이것때문에 갈수록 스픽 하면 걍 화가 나서 하기 싫음 음성이 아닌 키보드으로도 대화가 가능해지면 좋겠음", "score": 1, "date": "2026-07-08", "thumbs_up_count": 0, "matched_categories": "AI/튜터"}, {"review_text": "쉬운말도 못하니, 다른말 엄두가안났지요 이제 쉬운말 익히면 입이 좀 트일것 같아요", "score": 1, "date": "2026-07-08", "thumbs_up_count": 0, "matched_categories": "-"}, {"review_text": "구독취속했습니다 결재취소해주세요.", "score": 3, "date": "2026-07-15", "thumbs_up_count": 0, "matched_categories": "가격/구독"}, {"review_text": "업데이트 이후 수업 진행시 버퍼링이 너무 잦아졌습니다.", "score": 2, "date": "2026-07-02", "thumbs_up_count": 0, "matched_categories": "-"}, {"review_text": "연간 사용권 결제 조심", "score": 1, "date": "2026-07-17", "thumbs_up_count": 0, "matched_categories": "가격/구독"}, {"review_text": "뭔 진행 할라하면 계속 결제해서 쓰라고 하고 지우고 나가면 더이상 진행이 안되고 결제 안하면 더이상 할 수 없는 것 같음", "score": 3, "date": "2026-07-18", "thumbs_up_count": 0, "matched_categories": "가격/구독"}, {"review_text": "저는 1개월 무료체험 승인 요청했는데 매월 12일 19,916원이 카드견제 되고 있어요^^! 황당 합니다 빠른 해지나 계약취소 방법을 알려주세요 ^^!", "score": 1, "date": "2026-07-14", "thumbs_up_count": 0, "matched_categories": "-"}, {"review_text": "듀오링고 처럼 무료로 할 수 있는것과 유료로 할 수 있는게 나뉜게 아니라 모든게 유료입니다. 듀오링고 생각하고 받으시면 안돼요. 또한 요금제는 1인 비용이 듀오링고 가족 요금제 금액과 비슷해요.", "score": 1, "date": "2026-07-13", "thumbs_up_count": 0, "matched_categories": "가격/구독"}, {"review_text": "테블릿 가로모드 왜 적용이안되는지... 마이크 인식 문제로 여러번 같은 단어 반복", "score": 3, "date": "2026-07-16", "thumbs_up_count": 0, "matched_categories": "-"}, {"review_text": "아이가 사용이 안맞을거 같아 바로 취소했어요. 환불 부탁드립니다.", "score": 3, "date": "2026-07-18", "thumbs_up_count": 0, "matched_categories": "고객지원"}, {"review_text": "마이크가 안됨.", "score": 1, "date": "2026-07-21", "thumbs_up_count": 0, "matched_categories": "-"}, {"review_text": "아니 저번에 리뷰 썻는데 이제 더 않 좋와졌어여 아니 말을하자가 ai지 혼자서 말을 끈고 발음을 재데로 못아라먹고 2년동안 매일2시간씩 하는데도진짜....... 그리고 겔럭시10울트라 쓰는데 계속 지혼자 계속 튕기고 내가 말하기도 전에 자기혼자 넘어가고 발음을 한국어 발음처럼 딱딱하게 해야지 알아듯고 진짜 외국인 처럼 발음 하면 아해를 몼하고 진짜,,,", "score": 1, "date": "2026-07-21", "thumbs_up_count": 0, "matched_categories": "AI/튜터"}, {"review_text": "아니 앱 이름이 스픽인데 사용자가 영어 말하는거 인식을 못해서 오류가 한번 사용할때마다 꼭 한번씩은 나는게 말이되나요...?? 오류떠서 어플 닫고 다시 들어가고 같은 말 5번 반복하게 만든다면 버그 좀 수정해야하는거 아니에요? 프리톡이나 ai 튜터나 오류 진짜 많아요 구독 취소하고 싶은데 1년짜리라서 중간에 하차도 못합니다", "score": 1, "date": "2026-07-18", "thumbs_up_count": 0, "matched_categories": "가격/구독, 버그/오류, AI/튜터"}, {"review_text": "같은 상황을 반복할 수 있으면 좋겠어요. 잘못된 답변에 대한 피드백은 좋은데 그걸 사용하지 못하고 종료되서 아쉽네요. 1일차여서 더 해봐야할 듯 해요.", "score": 3, "date": "2026-07-17", "thumbs_up_count": 0, "matched_categories": "AI/튜터, 고객지원"}, {"review_text": "한국사람이니까 당연히 한국어로 일본어배울수있을줄 알고 10만원넘게 결재했습니다 영어로만 일본어를 배울수있게되어있네요 1분만에 삭제했습니다 제발 환불해주세요", "score": 1, "date": "2026-05-19", "thumbs_up_count": 0, "matched_categories": "고객지원"}, {"review_text": "자주 인지를 못함. 똑같은 말을 해도 어떤때는 인지하고 어떤때는 안하고가 심함. 너무 자주 있어서 스트레스 받음.", "score": 3, "date": "2026-05-19", "thumbs_up_count": 0, "matched_categories": "-"}, {"review_text": "유료라서 사용할수가 없는데 AI랑 대화할수있는것 처럼사기치냐 사기꾼들", "score": 1, "date": "2026-05-21", "thumbs_up_count": 0, "matched_categories": "가격/구독, AI/튜터"}, {"review_text": "정기결제 환불신청한지 2주가 지났는데 안해주나요. 환불해주세요 메일도 보냈어요", "score": 1, "date": "2026-05-22", "thumbs_up_count": 0, "matched_categories": "가격/구독, 고객지원"}, {"review_text": "일본어 모국어 한국이 없는게 너무 아쉽다", "score": 3, "date": "2026-05-24", "thumbs_up_count": 0, "matched_categories": "-"}, {"review_text": "환불해주세요 스픽은 전화를 해도 안받고 그냥 끊어버리네요 고객은 겁나 유치하려고 애쓰면서 전화번호는 그냥 폼인가요? 빠른시간안에 환불바랍니다", "score": 1, "date": "2026-05-26", "thumbs_up_count": 0, "matched_categories": "고객지원"}, {"review_text": "실수 및 관심사 기반 학습에서 학습을 해도 해당 레슨이 완료 체크가 안 되고 계속 똑같이 남아 있어요", "score": 2, "date": "2026-05-26", "thumbs_up_count": 0, "matched_categories": "-"}, {"review_text": "스픽 프리미엄 가입 해야해서 불편합니다 프리미엄 없이 다 했으면 좋겠네요", "score": 2, "date": "2026-05-30", "thumbs_up_count": 0, "matched_categories": "가격/구독, UX/사용성"}, {"review_text": "이 댓 쓸려고 앱 깔았고 바로 지울 껀데 뭔 광고로 자기 이점 살리지는 못할 망정 갑자기 이 분야로 높은 인지도 차지하고 있다고 부엉이랑 시간 날리기 이러면서 까내리는 건 진짜 뭡니까? 몇분 해보니까 차라리 듀오링고가 낫지", "score": 1, "date": "2026-06-06", "thumbs_up_count": 0, "matched_categories": "광고"}, {"review_text": "듀오링고 하다 이거 하니까 좀 불편해서 듀오로 갈게요ㅜㅜ", "score": 3, "date": "2026-06-07", "thumbs_up_count": 0, "matched_categories": "UX/사용성"}, {"review_text": "구독취소했는데 왜 결제가 되나요. 자동으로 콘텐츠 이용료 결제가 되었습니다. 취소해주세요!!", "score": 1, "date": "2026-06-12", "thumbs_up_count": 0, "matched_categories": "가격/구독"}, {"review_text": "환불 부탁드려요 년 결재가 되서 바로 환불요청 했는데 구글에서 환불안된다고 하고 7일 이내는 환불 된다고 적혀 있던데요 그리고 전화는 왜 안되죠", "score": 1, "date": "2026-06-11", "thumbs_up_count": 0, "matched_categories": "고객지원"}, {"review_text": "숙련도가 안 오름?", "score": 1, "date": "2026-06-13", "thumbs_up_count": 0, "matched_categories": "-"}, {"review_text": "잘 쓰고 있는데요. 복습하기 편하게 저장된 문장을 \"오래된순\"으로 볼 수 있는 기능이 생겼으면 좋겠습니다", "score": 3, "date": "2026-06-14", "thumbs_up_count": 0, "matched_categories": "-"}, {"review_text": "돈을 내야해서 아깝 12만원 ㄷㄷ", "score": 2, "date": "2026-06-15", "thumbs_up_count": 0, "matched_categories": "-"}, {"review_text": "삭제합니다. 복잡하고 인터페이스가 너무 귀찮을 정도로 불편하고 광고일색", "score": 1, "date": "2026-06-15", "thumbs_up_count": 0, "matched_categories": "광고, UX/사용성"}, {"review_text": "깔았는데도 게임 등에서 이 광고만 계속해서 쏟아지네요. 실제 프로그램은 얼마나 귀찮게 할까 싶어 삭제합니다.", "score": 1, "date": "2026-06-30", "thumbs_up_count": 0, "matched_categories": "광고"}, {"review_text": "안녕하세요.스픽을 한달동안 사용한 유저입니다.일단 스픽 공부는 도움이 꽤 많이 돼요.근데 요금이 너무 비싸요.그래서 일단 끊었어요...ㅡㅡ 요금제를 조금 낮춰주시면 글 다시 작성하고 별점 다시 드릴게요.그래도 돈 많으신 분들은 써도 좋은앱이에요^^스픽 화이팅~ :D", "score": 3, "date": "2026-06-30", "thumbs_up_count": 0, "matched_categories": "가격/구독"}, {"review_text": "한국말로 얘기할때 너무 느려요", "score": 3, "date": "2026-06-24", "thumbs_up_count": 0, "matched_categories": "-"}, {"review_text": "처음해봐요~ 기술이 참 좋네요. 잘되길 빌며...", "score": 3, "date": "2026-06-22", "thumbs_up_count": 0, "matched_categories": "-"}, {"review_text": "지금 결제를 했는데 기존에 한것보다 어떤게 더 추가됬는지요", "score": 1, "date": "2026-04-28", "thumbs_up_count": 0, "matched_categories": "가격/구독"}, {"review_text": "good", "score": 3, "date": "2026-04-30", "thumbs_up_count": 0, "matched_categories": "-"}, {"review_text": "스피킹 어플인데 음성인식이 쓰레기 수준임", "score": 1, "date": "2026-05-01", "thumbs_up_count": 0, "matched_categories": "-"}, {"review_text": "사용도안하는데 앱 연간이용료가 3년간나갔어요 너무황당하네요. 환불부탁드립니다 사용안했어요", "score": 1, "date": "2026-05-03", "thumbs_up_count": 0, "matched_categories": "고객지원"}, {"review_text": "구독취소및 환불요청드립니다", "score": 3, "date": "2026-05-07", "thumbs_up_count": 0, "matched_categories": "가격/구독, 고객지원"}, {"review_text": "좋긴 한데 현질 유도가 많네요 좀..... 그래요", "score": 2, "date": "2026-05-04", "thumbs_up_count": 0, "matched_categories": "-"}, {"review_text": "ai가 말을 못 알아들어요. 제대로 말했는데 완전 다른 단어로 알아듣고 문장 끝까지 말했는데도 중간에 잘린 버전으로 알아듣기도 하고 진짜 답답해요.제가 스피킹이 필요한 게 아니라 ai가 리스닝이 필요할 듯...... 그리고 제가 레슨을 완료했는데도 안한걸로 처리되고 다음날 와보니 불꽃이 꺼져 있더라고요. 어떻게 된 거죠?", "score": 1, "date": "2026-05-15", "thumbs_up_count": 0, "matched_categories": "AI/튜터"}, {"review_text": "무선 이어폰 쓰는데 무선 마이크 이어폰을 인식을 못하는 멍청함.", "score": 1, "date": "2026-05-14", "thumbs_up_count": 0, "matched_categories": "-"}, {"review_text": "너무 어렵고 늘지않고 1개월할려고 했는데 1년구독제밖에 안보였어요...1개월한줄 알았더니 1년구독되버려서", "score": 1, "date": "2026-05-12", "thumbs_up_count": 0, "matched_categories": "가격/구독, UX/사용성, 학습효과"}, {"review_text": "불꽃 위젯이 제대로 업데이트가 안됨", "score": 1, "date": "2026-05-14", "thumbs_up_count": 0, "matched_categories": "-"}, {"review_text": "말 하고 있는데 말 끊고 정답 띄우는거랑 음성인식 가끔 먹통 되는 거 진짜 최악", "score": 1, "date": "2026-05-11", "thumbs_up_count": 0, "matched_categories": "버그/오류"}, {"review_text": "음성인식이 섬세하면 좋겠어요. 학습보다 음성을 인식시키는 행위에 더 많은 에너지를 써서 자주 곤란해요", "score": 1, "date": "2026-05-08", "thumbs_up_count": 0, "matched_categories": "스트릭/동기부여"}, {"review_text": "돈 내야되서 안 좋아요.ㅠㅠㅠ하지만 AI와 대화하는게 원어민과 대화하는거 같아요", "score": 3, "date": "2026-04-09", "thumbs_up_count": 0, "matched_categories": "AI/튜터"}, {"review_text": "환불요청합니다", "score": 1, "date": "2026-04-09", "thumbs_up_count": 0, "matched_categories": "고객지원"}, {"review_text": "이거함부로 가입하면않됨니다 자기맘대로 결재하네요", "score": 1, "date": "2026-04-10", "thumbs_up_count": 0, "matched_categories": "-"}, {"review_text": "별로", "score": 1, "date": "2026-04-14", "thumbs_up_count": 0, "matched_categories": "-"}, {"review_text": "저만 알고싶은 앱이라 1점드립니다", "score": 1, "date": "2026-04-16", "thumbs_up_count": 0, "matched_categories": "-"}, {"review_text": "구독 취소 요청해서 구독 취소 했는데 계속 구독되고 있었습니다. 계정 삭제 전 무조건 구독취소를 같이 하셔야 돈이 안빠져 나갑니다. 구독 취소 하려면 여기저기 타고 들어가야 가능하게 만들어놓았습니다. UI가 중국산 마냥 여기저기 숨겨뒀네요. 개선 바랍니다.", "score": 1, "date": "2026-04-15", "thumbs_up_count": 0, "matched_categories": "가격/구독"}, {"review_text": "사기꾼 집단도 아니고 그달 구독 취소 유선 통화까지해서 완료 했는데 계속 결제가 되고 있는게 말이 됩니까? 이부분은 인터넷이든 모든 방법 통해서 고소 진행 하겠습니다.", "score": 1, "date": "2026-04-19", "thumbs_up_count": 0, "matched_categories": "가격/구독"}, {"review_text": "자꾸 예기치 못한 오류가 발생했다고 하면서 수업진행이 안됩니다. 일시적인 오류인가하여 다음 날 다음 날 계속 기다리는데도 안돼요. 마음같아서는 환불하고 싶은데 도닦는 심정으로 참습니다. 해결 좀 부탁드려요.", "score": 1, "date": "2026-04-18", "thumbs_up_count": 0, "matched_categories": "버그/오류, 고객지원"}, {"review_text": "롤플레이 기능 발음 인식이 잘 안되고 아예 작동이 안될때가 많네요. 지우고 다시 깔았는데도 마찬가지에요. 이전 버전이 훨씬 빠르고 인식이 잘됐는데", "score": 2, "date": "2026-04-19", "thumbs_up_count": 0, "matched_categories": "AI/튜터"}, {"review_text": "짜증나서포기 했어요. 처음에는 잘 되서 괜찮았는데 갈수록 말도 못 알아듣고 틀렸다고 하니까 은근히 화가 나요. 별로예요. 다른앱 하세요. 성질 더러워져요.", "score": 1, "date": "2026-04-21", "thumbs_up_count": 0, "matched_categories": "-"}, {"review_text": "자동결제 해지를 이렇게도 꽁꽁 숨겨놓을수가 있네 ㅋㅋㅋ 쿠팡 저리가라임 다시는 안쓴다", "score": 1, "date": "2026-05-04", "thumbs_up_count": 0, "matched_categories": "가격/구독"}, {"review_text": "네트워크 환경에 따라 음성인식률이 현저히 떨어짐. 청각장애인이랑 영어연습하는 수준", "score": 1, "date": "2026-05-04", "thumbs_up_count": 0, "matched_categories": "-"}, {"review_text": "도움도 별로 안되고 1별주기도 아깝습니다 말을해도 인식을 못하고 스트레스만 받고있습니다 유료앱이란게 이해가 안되네요", "score": 1, "date": "2026-03-30", "thumbs_up_count": 0, "matched_categories": "가격/구독"}, {"review_text": "비쥬얼 모드로 바뀐 후 음성 인식이 안좋아진 문제가 있습니다", "score": 3, "date": "2026-04-07", "thumbs_up_count": 0, "matched_categories": "-"}, {"review_text": "튜터가 실시간? 그런거로 바뀌고 난 뒤부터 음성인식이 너무 안됩니다 다른 컨텐츠들은 인식 잘되는데 무슨 말도안되는 폰을 껐다켜라느니 업데이트를 하라느니 석기시대같은 방법이나 해보라고하고 그냥 포기합니다", "score": 1, "date": "2026-04-06", "thumbs_up_count": 0, "matched_categories": "AI/튜터"}, {"review_text": "안녕하세요 1년 정기결제가 자동결제 되어서 취소요청 드렸는데 언제 취소될까요?", "score": 1, "date": "2026-04-06", "thumbs_up_count": 0, "matched_categories": "가격/구독"}, {"review_text": "프리톡 학습내역 표시는 이제 100개로 제한된 건가요? 전체 학습내역은 이제 볼수 없나요??", "score": 3, "date": "2026-03-25", "thumbs_up_count": 0, "matched_categories": "-"}, {"review_text": "스피킹한 내용 저장 능력 개선이 필요해요. 뭐가 문제인지 들어보려고 해도 그냥 저장이 안되어 있는 경우가 빈번합니다", "score": 3, "date": "2026-03-29", "thumbs_up_count": 0, "matched_categories": "-"}, {"review_text": "쉽게 영어를 따라하며 배울 수 있어요", "score": 3, "date": "2026-03-28", "thumbs_up_count": 0, "matched_categories": "-"}, {"review_text": "굿 좋아요", "score": 3, "date": "2026-03-28", "thumbs_up_count": 0, "matched_categories": "-"}, {"review_text": "단어와 올바른표현을 알수있어 좋았음.", "score": 3, "date": "2026-04-04", "thumbs_up_count": 0, "matched_categories": "-"}, {"review_text": "러시아어 없음", "score": 1, "date": "2026-04-03", "thumbs_up_count": 0, "matched_categories": "-"}, {"review_text": "프로그램 자체 랙으로 음성 인식률 자체가 너무 떨어져 쓰레기같은 학습경험을 선사함", "score": 1, "date": "2026-04-02", "thumbs_up_count": 0, "matched_categories": "-"}, {"review_text": "오늘 갑자기 카드결재가되었어요 제가사용안한지8개월이 넘었는데 저한테 확인없이 카드 결재가 되었는지 그 이유를 모르겠지만 환불해주세요", "score": 1, "date": "2026-03-20", "thumbs_up_count": 0, "matched_categories": "고객지원"}, {"review_text": "ai랑 대화하는 것 좀 그만 넣어주세요 특히 고급과정... 이럴거면 그냥 진짜 ai랑 대화하지 누가 스픽합니까 콘텐츠로 좀 만들어주세요 ..", "score": 3, "date": "2026-03-18", "thumbs_up_count": 0, "matched_categories": "AI/튜터"}, {"review_text": "결제하고 잘하고있는데 자꾸 리뷰쓰라고 하지마라 귀찮아죽겠네", "score": 1, "date": "2026-03-20", "thumbs_up_count": 0, "matched_categories": "가격/구독"}, {"review_text": "과거 롤플레이 대화내용이 저장되면 좋겠습니다. 낮은 단계에선 가능했는데, 유닛3부터 과거이력이 안 남더라구요. 대화중 저장하고픈 표현 많은데, 꼭 가능하게 해 주십시오~~~그럼 별점도 수정할게요~~", "score": 3, "date": "2026-03-24", "thumbs_up_count": 0, "matched_categories": "-"}, {"review_text": "doesnt seem like theres special service and keep requires me to pay", "score": 1, "date": "2026-03-17", "thumbs_up_count": 0, "matched_categories": "-"}, {"review_text": "말을 많이 할 수 있는건 좋은데 그 뿐임. 그 외 컨텐츠가 거의 없게 느껴짐.", "score": 1, "date": "2026-03-14", "thumbs_up_count": 0, "matched_categories": "-"}, {"review_text": "말해보고 실제사용해보니 상당히실용적이다.", "score": 3, "date": "2026-03-17", "thumbs_up_count": 0, "matched_categories": "-"}, {"review_text": "남의 회사 명성으로 낚시질 하지마라", "score": 1, "date": "2026-03-12", "thumbs_up_count": 0, "matched_categories": "-"}, {"review_text": "좋긴한데 음성인식 안되는거 개빡쳐서 폰 이빨로 물었더니 필름에 금감", "score": 3, "date": "2026-03-11", "thumbs_up_count": 0, "matched_categories": "-"}], defaultN: 3 },
+    lang:  { complaints: [{"review_text": "매일 자기전 랭플릭스로 공부하고 자는게 낙이였는데 갑자기 거의 모든게 유료화 되어버렸네요... 기존 사용자들을 위해 유료구독 하지 않아도 기본 기능은 사용할 수 있었으면 좋았을 것 같은데 많이 아쉽습니다 거의 모든 기능이 유료결제 하지않으면 사용할 수 없게 되었네요 하루 복습만이라도 무료이용이 가능했다면 어땠을까하는 아쉬움이 남습니다", "score": 3, "date": "2025-11-30", "thumbs_up_count": 13, "matched_categories": "가격/구독"}, {"review_text": "무료로 매일 영화 속 대사로 단어와 숙어, 일상에서는 어떻게 활용되는지까지 학습할 수 있어서 너무 잘 쓰고 있었습니다. 다만 오늘(27일)부터 앱이 업데이트가 되었는지 갑자기 '일상에선 이렇게 말해요'랑 학습도 2개만 가능하고 더 하고싶으면 멤버십 결제를 해야하네요.... 잘쓰고 있는 어플이었는데 갑작스럽게 유료화되어서 당황스러워요 업데이트 전에 미리 공지를 해주셨으면 어땠을까하는 아쉬움이 있습니다..", "score": 3, "date": "2025-11-30", "thumbs_up_count": 13, "matched_categories": "가격/구독"}, {"review_text": "이번 달에만 3번을 앱이 작동을 안 해서 앱 사용을 못했습니다. 지금도 그렇고요. 유료 결제까지 해서 사용하고 있는데 앱을 쓰지를 못하면 조치라도 취해주셔야 하는게 아닌가요? 아무 공지도 사과도 없고 운영을 왜 이렇게 하시는지 모르겠네요. 빠른 복구 부탁드립니다.", "score": 1, "date": "2025-12-30", "thumbs_up_count": 11, "matched_categories": "가격/구독"}, {"review_text": "최근에 이 앱을 알게되어서 이주 안되게 사용하고 있었는데 갑작스러운 유료전환은 아쉬워요ㅠㅠ 공지라도 있었으면 좋았겠다는 생각이 드네요 .. 사실상 무료로는 아무기능도 사용하지 못하게 다 막혀버려서.. 타 어플에 비해 구독료도 저렴한 편이 아니라 아쉽게 느껴져요 중간중간 오류도 꽤 있어서(음성 안들림, 버튼 안눌림 등) 결제까지 해야될 지 더 고민되네요...", "score": 3, "date": "2025-11-29", "thumbs_up_count": 6, "matched_categories": "가격/구독, 버그/오류, UX/사용성"}, {"review_text": "앱의 목적성의 좋으나 업데이트 이후 에러가 너무 많이나서 수업을 진행하기가 힘들고 애초에 잘 안 들어가집니다. 좋은 앱 유료화 하는것 까지는 괜찮은데 돈을 냈는데도 사용을 못 하고 있네요ㅠㅠ 진짜 기능을 많이 넣는 것 보다 얼른 오류나 없애주세요ㅠㅠ 갑자기 올해 업그레드 하고 기능 이것 저것 넣고 업그레드이 할때마다 오류가 어쩜 심해지는지 앱 자체 콘텐츠는 좋아서 유료라도 쓰는데 애초에 학습이 끊기고 안들어가져서 너무너무 짜증나요ㅠㅠㅠ 제발 당장 기능추가보다는 오류 안 나게 부탁드립니다ㅠㅠ 학습하다 끊겨서 넘 스트레스에요ㅠㅠ 어떻게 학습하라는건지", "score": 1, "date": "2026-03-21", "thumbs_up_count": 5, "matched_categories": "가격/구독, 버그/오류"}, {"review_text": "로그인이 안돼요. 네크워크 연결 안됬다고 뜨는데 전 지금 네트워크 빵빵한 곳에 있습니다. 로그인 하고싶어요.", "score": 1, "date": "2025-12-05", "thumbs_up_count": 5, "matched_categories": "-"}, {"review_text": "업데이트 이후 어플이 작동되지 않습니다. 업데이트를 했음에도 불구하고 최신 버전으로 업데이트하라는 창이 뜨고, 한 번 더 누르면 처음 화면에서 넘어가질 않습니다.", "score": 3, "date": "2025-11-29", "thumbs_up_count": 3, "matched_categories": "-"}, {"review_text": "다른 점은 다 만족해요 다만, 크레딧을 사려고 4500원을 지불하고 크레딧을 샀거든요? 크레딧으로 교환까지했는데 그러면 45분이 들어와야하잖아요, 근데 전혀 안 들어왔네요. 게다가 유튜브 영상이 자막 만들던 중 안돼면 (재설정하고 새로고침해도 안돼는 것들) 삭제하잖아요? 근데 삭제하면 그 영상들 분량만큼 만들수 있는 영상 분량이 돌아와야하는 거 아닌가요.. 오히려 깎이네요..", "score": 2, "date": "2026-01-19", "thumbs_up_count": 3, "matched_categories": "-"}, {"review_text": "유료 결제후 사용중인데 앱이 너무 무거워요.. 툭하면 중간에 멈추고 꺼지고 오류나고, 영어 ai 통화도 오류가나서 해석이 같이안나오거나 영어문장교정도 틀린경우가많아요....그리고 링크넣은후 학습영상을 1초짜리로만든다거나 그런오류도 너무많아요.. 네트워크도잘되는데 자꾸 일시적네트웍오류났다고하질않나... 그리고 유저에게 상태표시좀 확실히해주면좋겠어요 영상생성중인데 표시가 안되어서 헷갈릴때가많아요 학습에 방해가되어서 앱취지는 좋은데 빨리고쳐주면좋겠어요.. 앱 부하좀줄이고 성능, 오류개선 그리고 충분한 테스트와 개선 좀 내부적으로해주시길 ㅜㅜ..", "score": 1, "date": "2026-07-04", "thumbs_up_count": 2, "matched_categories": "가격/구독, 버그/오류, UX/사용성, AI/튜터"}, {"review_text": "유료서비스임에도 불구하고 광고시청을 해야합니다.", "score": 1, "date": "2026-06-19", "thumbs_up_count": 2, "matched_categories": "가격/구독, 광고"}, {"review_text": "예전부터 문의도 몇 번 넣어봤는데 해결이 안되었습니다. 몇 개월 쓰면서 오류 나고 튕긴 적이 얼마나 많은지 모르겠어요. 앱 사용하며 지금도 충분히 불편하거나 부족하다 느껴지는 것 없이 랭플릭스만의 매력이 있다 생각했습니다. 계속 UI 바꾸고 업데이트하면서 오류나 로딩지연만 늘어나는 것 같아요.. 업데이트 필요없으니 오류 많은 것부터 고쳐주세요. 다른 후기들처럼 기껏 결제까지 해놓고 오류가 잦아 잘 안찾게 되네요", "score": 1, "date": "2026-06-18", "thumbs_up_count": 2, "matched_categories": "가격/구독, 버그/오류, UX/사용성, 고객지원"}, {"review_text": "뭔데 결제유도부터 하냐 시작부터 비호감인 앱", "score": 1, "date": "2026-04-13", "thumbs_up_count": 2, "matched_categories": "가격/구독"}, {"review_text": "초반 단어부분만 하고 삭제했는데 약간 뜻이 예시로 나온 문구랑 안맞는거 같고 미드 종류가 너무 적어요", "score": 2, "date": "2025-05-20", "thumbs_up_count": 2, "matched_categories": "-"}, {"review_text": "업데이트했더니 연속학습이 다 날아갔는데 이거 뭐죠??", "score": 1, "date": "2025-09-27", "thumbs_up_count": 2, "matched_categories": "스트릭/동기부여"}, {"review_text": "로딩이 너무 오래걸리고 에러가 너무 많아서 중지되는 경우가 많아요", "score": 1, "date": "2026-06-18", "thumbs_up_count": 1, "matched_categories": "버그/오류"}, {"review_text": "렉이 너무걸리는데요", "score": 3, "date": "2026-04-12", "thumbs_up_count": 1, "matched_categories": "버그/오류"}, {"review_text": "앱 자체 기능은 너무 좋은데요 최적화가 많이 덜 된 거 같아요 기능 > 기능으로 넘어가는 로딩 시간이 지나치게 오래 걸립니다.", "score": 3, "date": "2026-04-18", "thumbs_up_count": 1, "matched_categories": "버그/오류"}, {"review_text": "최근 업데이트 이후로 타자에서 보이스로 바꾸거나, 한 번 힌트를 보면 그 다음 문제에서도 계속 정답이 드러나네요. 하라는 건지 말라는 건지 ㅠㅠ...", "score": 3, "date": "2026-02-12", "thumbs_up_count": 1, "matched_categories": "-"}, {"review_text": "앱에 자잘한 오류가 너무너무 많아서 불편해서ㅜ잘 안키게되요 어떻게든 흥미붙이려고 써보고 있는데 업데이트도 너무 잦고 업데이트 해도 오류가 자잘하게 너무 많습니다 1. 스크롤 할때 너무 버벅임(둘러보기 페이지) 2. shorts제한. 1200개 가까이 있다는데 둘어보기에서 쇼츠 부분 클릭후 이스트에 18개?정도 밖에 안뜸. 쇼츠도 개인적으로 분류가 있으면 좋겠음 3. 유투브자료로 학습 만들기 할때 자꾸 꼭한번 앱이 강제종료됨 4. 쇼츠로 학습할때 반복버튼이 한영상 반복 - 반복 끔 - 한문장 반복 이런식인거같은데 문장 반복 버튼 온오프랑 영상반복 버틍 온오프랑 분리했으몀 좋겠음 불편함 이외에도 전체적으로 사용자 ui설계가 묘하게 불편하게 되어있음 내가 개발자도 아니니 일일이 적어둘 필요가 없으니 대충…", "score": 2, "date": "2026-06-13", "thumbs_up_count": 1, "matched_categories": "버그/오류, UX/사용성, 고객지원"}, {"review_text": "체험해보고 좋은것같아서 1년 구독했는데요, 업데이트가 너무 잦고 로딩이 너무 오래걸려서 공부하려고 앱을 열었다가도 레슨하나못하고 앱을 닫게되는 일이 잦습니다. 유튜브 영상 검색했을때도 결과가 나오는 로딩 너무 오래걸리고 등등 영어공부를 하려다가도 안하게돼요! 이러면 어플이 무슨 의미인지 잘 모르겠어서 회의감이드네요. 공부 쉽게 자주 하는 김에 구독한건데. 개선부탁합니다. 이런 불안정한 어플.. 시기상조입니다", "score": 2, "date": "2026-06-08", "thumbs_up_count": 1, "matched_categories": "가격/구독, 버그/오류"}, {"review_text": "제가 인기 영상이 아닌 영화를 선택해서 그런지 재생되지 않는 문장이 많네요...일단 영화 하나를 다 학습 후 구매를 고민해볼 것 같습니다", "score": 3, "date": "2025-11-27", "thumbs_up_count": 1, "matched_categories": "-"}, {"review_text": "환불 부탁드립니다. 넷플릭스 확장 프로그램이라고 광고해서 구매했더니 PC 사용ㅇ이네요,, 진짜 황당 구매하면 사용할 수 있는 것처럼 해두시고는 ... pc면 무료 구글 확장 쓰죠,,, 유튜브 영상도 로딩 느려서 공부하는데 계속 기다려야하고,,, 무료 쓰다 돈 쓰면 퀄 달라질줄 알았는데 너무 실망입니다.. 당장 답변 부탁드려요", "score": 1, "date": "2026-06-03", "thumbs_up_count": 0, "matched_categories": "광고, 버그/오류, 고객지원"}, {"review_text": "5분 통화 해봤는데 녹음버튼 눌렀더니 안눌리고 나갔다 다시 들어가보랴고 했더니 하루에 한번만 된다고 하네욥... 오류가 있을 수도 있으니 하루 총 이용시간 5분을 기준으로 사용할수 있어야 하는거 아닌지..", "score": 3, "date": "2026-05-31", "thumbs_up_count": 0, "matched_categories": "버그/오류, UX/사용성"}, {"review_text": "ㅠ잘쓰고 있었는데 섀도잉 누르면 음성로딩에 실패했다고 뜨면서 진행이 안되요", "score": 2, "date": "2026-07-01", "thumbs_up_count": 0, "matched_categories": "버그/오류"}, {"review_text": "갤럭시 탭은 가로모드가 안되나요? 정말 불편하네요...", "score": 2, "date": "2026-07-12", "thumbs_up_count": 0, "matched_categories": "UX/사용성"}, {"review_text": "프리미엄 결제후에 앱이 자꾸 꺼지고 ㅠ 삭제 다운로드 반복중입니다... 프리미엄 결제 취소해 주세요... 학습이 안됩니다", "score": 2, "date": "2026-07-13", "thumbs_up_count": 0, "matched_categories": "가격/구독"}, {"review_text": "좀 둘러보는데 무료 버전 제약이 너무 커서 결제하기엔 이걸로 습관이 생길 수 있을지 모르겠어요.", "score": 2, "date": "2026-06-13", "thumbs_up_count": 0, "matched_categories": "가격/구독"}, {"review_text": "cnn 유튜브 영상으로 시작해봤는데 오 마이 갓 밖에 안들린다... 그냥 오 마이 갓 밖에 안나옴... 그리고 내가 추가한 영상 어디서 확인이 가능한지 찾을 수가 없다", "score": 3, "date": "2026-01-16", "thumbs_up_count": 0, "matched_categories": "-"}],  defaultN: 4 },
+  };
+
+  function truncateText(text, limit){
+    text = text.replace(/\s+/g, ' ').trim();
+    if (text.length <= limit) return text;
+    const cut = text.slice(0, limit);
+    const lastSpace = cut.lastIndexOf(' ');
+    return (lastSpace > 0 ? cut.slice(0, lastSpace) : cut) + '…';
+  }
+
+  function renderQuoteCards(container, list){
+    container.innerHTML = '';
+    list.forEach(q => {
+      const card = document.createElement('div');
+      card.className = 'quote-card';
+
+      const meta = document.createElement('div');
+      meta.className = 'qmeta';
+      const scoreSpan = document.createElement('span');
+      scoreSpan.className = 'score' + (q.score === 3 ? ' mid' : '');
+      scoreSpan.textContent = q.score + '점';
+      meta.appendChild(scoreSpan);
+      const dateSpan = document.createElement('span');
+      dateSpan.textContent = q.date;
+      meta.appendChild(dateSpan);
+      const thumbSpan = document.createElement('span');
+      thumbSpan.textContent = '· 공감 ' + q.thumbs_up_count;
+      meta.appendChild(thumbSpan);
+      card.appendChild(meta);
+
+      const p = document.createElement('p');
+      p.textContent = truncateText(q.review_text, 220);
+      card.appendChild(p);
+
+      if (q.matched_categories && q.matched_categories !== '-') {
+        const tags = document.createElement('div');
+        tags.className = 'tags';
+        q.matched_categories.split(',').forEach(c => {
+          const t = document.createElement('span');
+          t.className = 'tag';
+          t.textContent = c.trim();
+          tags.appendChild(t);
+        });
+        card.appendChild(tags);
+      }
+      container.appendChild(card);
+    });
+  }
+
+  Object.keys(APP_CONFIG).forEach(appKey => {
+    const cfg = APP_CONFIG[appKey];
+    const grid = document.querySelector('.quote-grid[data-app="' + appKey + '"]');
+    const chipsWrap = document.querySelector('.chips[data-app="' + appKey + '"]');
+    const status = document.querySelector('.filter-status[data-app="' + appKey + '"]');
+    const statusLabel = status.querySelector('.label');
+    const resetBtn = status.querySelector('.reset');
+
+    function showDefault(){
+      renderQuoteCards(grid, cfg.complaints.slice(0, cfg.defaultN));
+      status.classList.remove('show');
+      chipsWrap.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+    }
+
+    function showFiltered(keyword, chipEl){
+      const matches = cfg.complaints.filter(q => q.review_text.includes(keyword));
+      renderQuoteCards(grid, matches.slice(0, 12));
+      chipsWrap.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+      chipEl.classList.add('active');
+      const more = matches.length > 12 ? ' (상위 12건만 표시)' : '';
+      statusLabel.textContent = '"' + keyword + '" 포함 리뷰 ' + matches.length + '건' + more;
+      status.classList.add('show');
+    }
+
+    chipsWrap.querySelectorAll('.chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        if (chip.classList.contains('active')) { showDefault(); return; }
+        showFiltered(chip.dataset.keyword, chip);
+      });
+    });
+    resetBtn.addEventListener('click', showDefault);
+
+    showDefault();
   });
 })();
 </script>

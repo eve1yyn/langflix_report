@@ -120,28 +120,81 @@ def build_chips(app):
     self_name = app["app_name"]
     kws = [k for k in app["keyword_freq"] if k["keyword"] != self_name][:CHIP_COUNT]
     return "\n".join(
-        f'        <span class="chip"><b>{escape_html(k["keyword"])}</b> {k["count"]}</span>'
+        f'        <button type="button" class="chip" data-keyword="{escape_html(k["keyword"])}">'
+        f'<b>{escape_html(k["keyword"])}</b> {k["count"]}</button>'
         for k in kws
     )
 
 
-def build_quote_cards(app, n):
+def build_complaints_json(app, limit=400):
+    items = []
+    for q in app["complaints_all"]:
+        items.append({
+            "review_text": truncate(q["review_text"], limit),
+            "score": int(q["score"]),
+            "date": str(q["date"])[:10],
+            "thumbs_up_count": q["thumbs_up_count"],
+            "matched_categories": q["matched_categories"],
+        })
+    return json.dumps(items, ensure_ascii=False)
+
+
+def build_new_features(summary, features_meta):
+    blocks = []
+    for key in APP_ORDER:
+        app = summary[key]
+        meta = features_meta.get(key, {})
+        version = meta.get("version") or "정보 없음"
+        updated = meta.get("updated") or "정보 없음"
+        mentions = app.get("feature_mentions", [])
+
+        mention_html = ""
+        if mentions:
+            cards = []
+            for m in mentions[:5]:
+                date_str = str(m["date"])[:10]
+                cards.append(f"""          <div class="feature-card">
+            <div class="qmeta"><span>{date_str}</span><span>· v{escape_html(str(m['app_version']))}</span><span>· 공감 {m['thumbs_up_count']}</span></div>
+            <p>{escape_html(truncate(m['review_text'], 240))}</p>
+          </div>""")
+            mention_html = "\n".join(cards)
+        else:
+            mention_html = '          <p class="empty-note">최근 리뷰에서 특별한 신규 기능/변경사항 언급이 발견되지 않았습니다.</p>'
+
+        blocks.append(f"""
+      <div class="app-sub">
+        <h3><span class="dot" style="background:var({APP_VAR[key]})"></span>{escape_html(app['app_name'])}</h3>
+        <div class="feature-meta">최근 업데이트 <b>{updated}</b> · 버전 <b>{escape_html(str(version))}</b></div>
+        <div class="section-sub"><p>아래는 공식 릴리즈 노트가 아니라, 리뷰 원문에서 "업데이트/추가/이벤트" 등 변경 관련 표현이 포착된 리뷰입니다.</p></div>
+        <div class="feature-grid">
+{mention_html}
+        </div>
+      </div>""")
+    return "\n".join(blocks)
+
+
+def build_news(news_items):
+    if not news_items:
+        return '      <p class="empty-note">최근 90일 내 수집된 뉴스가 없습니다.</p>'
     cards = []
-    for q in app["top_complaints"][:n]:
-        score = int(q["score"])
-        score_cls = "score mid" if score == 3 else "score"
-        date_str = str(q["date"])[:10]
-        cats = q["matched_categories"]
-        tags = ""
-        if cats and cats != "-":
-            tags = '<div class="tags">' + "".join(
-                f'<span class="tag">{escape_html(c.strip())}</span>' for c in cats.split(",")
-            ) + "</div>"
-        cards.append(f"""        <div class="quote-card">
-          <div class="qmeta"><span class="{score_cls}">{score}점</span><span>{date_str}</span><span>· 공감 {q['thumbs_up_count']}</span></div>
-          <p>{escape_html(truncate(q['review_text']))}</p>
-          {tags}
-        </div>""")
+    for n in news_items:
+        cards.append(f"""      <a class="news-card" href="{escape_html(n['link'])}" target="_blank" rel="noopener noreferrer">
+        <div class="news-title">{escape_html(n['title'])}</div>
+        <div class="news-meta">{escape_html(n['source'])} · {n['date']}</div>
+      </a>""")
+    return "\n".join(cards)
+
+
+def build_youtube(videos):
+    if not videos:
+        return '      <p class="empty-note">최근 수집된 영상이 없습니다.</p>'
+    cards = []
+    for v in videos:
+        likes = f"{v['likes']:,}" if v.get("likes") is not None else "-"
+        cards.append(f"""      <a class="yt-card" href="{escape_html(v['url'])}" target="_blank" rel="noopener noreferrer">
+        <div class="news-title">{escape_html(v['title'])}</div>
+        <div class="news-meta">{escape_html(v['channel'])} · 조회 {v['views']:,} · 좋아요 {likes} · {v['published_at']}</div>
+      </a>""")
     return "\n".join(cards)
 
 
@@ -221,8 +274,8 @@ def build_summary_paragraphs(summary):
             if app["complaint_count"] else 0
         )
         comp_sentences.append(
-            f"{app['app_name']}은 평균 {app['avg_score']}점, 불만율 {rate}%이며 "
-            f"최다 불만 카테고리는 '{top['category']}'({top_pct}%)입니다."
+            f"<p>{app['app_name']}은 평균 {app['avg_score']}점, 불만율 {rate}%이며 "
+            f"최다 불만 카테고리는 '{top['category']}'({top_pct}%)입니다.</p>"
         )
 
     paragraphs = [
@@ -231,7 +284,7 @@ def build_summary_paragraphs(summary):
             f"<p>랭플릭스는 평균 별점 <b>{own['avg_score']}</b>점, 불만율 <b>{own_rate}%</b>이며, "
             f"가장 많이 제기된 불만은 '{own_top['category']}'({own_top_pct}%)입니다.</p>"
         ),
-        "<p>" + " ".join(comp_sentences) + "</p>",
+        *comp_sentences,
     ]
     return "\n".join(paragraphs)
 
@@ -257,8 +310,19 @@ def build_version_table(app, n=5):
     )
 
 
+def load_json_if_exists(path):
+    try:
+        with open(path, encoding="utf-8") as f:
+            return json.load(f)
+    except FileNotFoundError:
+        return None
+
+
 def main():
     summary = load_summary()
+    features_meta = load_json_if_exists("data/new_features.json") or {}
+    news_items = load_json_if_exists("data/industry_news.json") or []
+    youtube_items = load_json_if_exists("data/youtube_trends.json") or []
 
     stat_cards = build_stat_cards(summary)
     cat_rows, domain_max = build_cat_data(summary)
@@ -296,10 +360,16 @@ def main():
         .replace("__DUO_CHIPS__", build_chips(summary["duolingo"]))
         .replace("__SPEAK_CHIPS__", build_chips(summary["speak"]))
         .replace("__LANG_CHIPS__", build_chips(own))
-        .replace("__DUO_QUOTES__", build_quote_cards(summary["duolingo"], QUOTE_COUNT["duolingo"]))
-        .replace("__SPEAK_QUOTES__", build_quote_cards(summary["speak"], QUOTE_COUNT["speak"]))
-        .replace("__LANG_QUOTES__", build_quote_cards(own, QUOTE_COUNT["langflix"]))
+        .replace("__DUO_COMPLAINTS_JSON__", build_complaints_json(summary["duolingo"]))
+        .replace("__SPEAK_COMPLAINTS_JSON__", build_complaints_json(summary["speak"]))
+        .replace("__LANG_COMPLAINTS_JSON__", build_complaints_json(own))
+        .replace("__DUO_DEFAULT_N__", str(QUOTE_COUNT["duolingo"]))
+        .replace("__SPEAK_DEFAULT_N__", str(QUOTE_COUNT["speak"]))
+        .replace("__LANG_DEFAULT_N__", str(QUOTE_COUNT["langflix"]))
         .replace("__VERSION_ROWS__", build_version_table(own))
+        .replace("__NEW_FEATURES_HTML__", build_new_features(summary, features_meta))
+        .replace("__NEWS_HTML__", build_news(news_items))
+        .replace("__YOUTUBE_HTML__", build_youtube(youtube_items))
     )
 
     with open("index.html", "w", encoding="utf-8") as f:

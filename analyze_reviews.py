@@ -39,6 +39,12 @@ CATEGORY_KEYWORDS = {
     "고객지원": ["문의", "고객센터", "환불", "답변", "cs"],
 }
 
+# 신규 기능/변경사항 언급 감지용 키워드 (전체 리뷰 대상, 불만 여부 무관)
+FEATURE_MENTION_KEYWORDS = [
+    "업데이트", "새로운", "새롭게", "추가되", "추가됐", "리뉴얼", "개편",
+    "이벤트", "출시", "신기능", "새기능",
+]
+
 kiwi = Kiwi()
 
 
@@ -98,6 +104,22 @@ def analyze_app(app_key: str) -> dict:
     top_complaints["matched_categories"] = top_complaints["review_text"].astype(str).apply(matched_categories)
     top_complaints = top_complaints[["review_text", "score", "date", "thumbs_up_count", "matched_categories"]]
 
+    # 전체 불만 리뷰(카테고리 태깅 포함) — 리포트의 키워드 클릭 필터용
+    complaints_all = complaints.copy()
+    complaints_all["matched_categories"] = complaints_all["review_text"].astype(str).apply(matched_categories)
+    complaints_all = complaints_all.sort_values("thumbs_up_count", ascending=False)
+    complaints_all = complaints_all[["review_text", "score", "date", "thumbs_up_count", "matched_categories"]]
+
+    # 신규 기능/변경사항 언급 리뷰 (불만 여부 무관, 전체 리뷰 대상)
+    feature_mask = df["review_text"].astype(str).apply(
+        lambda text: any(kw in text for kw in FEATURE_MENTION_KEYWORDS)
+    )
+    feature_mentions = (
+        df.loc[feature_mask]
+        .sort_values(["date", "thumbs_up_count"], ascending=[False, False])
+        .head(8)[["review_text", "score", "date", "thumbs_up_count", "app_version"]]
+    )
+
     # 앱 버전별 불만 추이
     version_trend = (
         complaints.groupby("app_version")
@@ -129,6 +151,8 @@ def analyze_app(app_key: str) -> dict:
         "keyword_freq": keyword_freq.to_dict(orient="records"),
         "category_summary": category_summary.to_dict(orient="records"),
         "top_complaints": top_complaints.to_dict(orient="records"),
+        "complaints_all": complaints_all.to_dict(orient="records"),
+        "feature_mentions": feature_mentions.to_dict(orient="records"),
         "version_trend": version_trend.to_dict(orient="records"),
         "date_range": [str(df["date"].min().date()), str(df["date"].max().date())],
     }
